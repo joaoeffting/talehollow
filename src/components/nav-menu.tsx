@@ -34,9 +34,10 @@ export function NavMenu({ locale }: { locale: string }) {
           render={<Link href="/account">Account</Link>}
         ></DropdownMenuItem>
         <DropdownMenuSeparator />
-        {/* DropdownMenuItem isn't a real <form>, so the Server Action is
-            called directly here rather than via the <form action={...}>
-            pattern the account page (below) uses for its own logout button. */}
+        <DropdownMenuItem
+          render={<Link href="/settings">Settings</Link>}
+        ></DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => logout(locale)}>
           Log out
         </DropdownMenuItem>
