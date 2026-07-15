@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { Providers } from "../providers";
 import { PostHogPageview } from "@/components/posthog-pageview";
+import { NavAuthLinks } from "@/components/nav-auth-links";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -43,6 +44,7 @@ export default async function RootLayout({
                 <Link href="/" className="text-lg font-semibold">
                   Storyloom
                 </Link>
+                <NavAuthLinks locale={locale} />
               </div>
             </header>
             <main className="mx-auto max-w-5xl p-4">{children}</main>
