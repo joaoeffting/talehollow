@@ -38,6 +38,10 @@ export function NavMenu({ locale }: { locale: string }) {
           render={<Link href="/settings">Settings</Link>}
         ></DropdownMenuItem>
         <DropdownMenuSeparator />
+        <DropdownMenuItem
+          render={<Link href="/dashboard">Author Dashboard</Link>}
+        ></DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => logout(locale)}>
           Log out
         </DropdownMenuItem>
