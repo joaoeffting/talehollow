@@ -3,6 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 
+export async function toggleChapterPublished(
+  chapterId: string,
+  bookId: string,
+  locale: string,
+  isPublished: boolean,
+) {
+  const supabase = await createClient();
+  await supabase
+    .from("chapters")
+    .update({ is_published: !isPublished })
+    .eq("id", chapterId);
+  revalidatePath(`/${locale}/dashboard/books/${bookId}`);
+}
+
 export async function createChapter(
   bookId: string,
   locale: string,

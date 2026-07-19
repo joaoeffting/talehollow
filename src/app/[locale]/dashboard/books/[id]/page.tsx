@@ -20,6 +20,10 @@ import {
 } from "@/components/ui/accordion";
 import { SaveWithLoading } from "@/components/save-with-loading";
 import { GenreSelect } from "@/components/genre-select";
+import { toggleBookPublished, publishBookAndChapters } from "../actions";
+import { Link } from "@/i18n/navigation";
+import { toggleChapterPublished } from "./chapters/actions";
+import { ChapterActionsMenu } from "@/components/chapter-actions-menu";
 
 export default async function EditBookPage({
   params,
@@ -51,6 +55,36 @@ export default async function EditBookPage({
     // need the room.
     <div className="mx-auto max-w-3xl space-y-6 py-12">
       <h1 className="text-2xl font-semibold">{book.title}</h1>
+      <div className="flex flex-wrap items-center gap-2">
+        <form
+          action={toggleBookPublished.bind(
+            null,
+            book.id,
+            locale,
+            book.is_published,
+          )}
+        >
+          <button
+            className={
+              book.is_published
+                ? "rounded border border-amber-600 px-3 py-1 text-sm text-amber-700"
+                : "rounded border border-primary px-3 py-1 text-sm text-primary"
+            }
+          >
+            {book.is_published ? "Unpublish" : "Publish"}
+          </button>
+        </form>
+        <form action={publishBookAndChapters.bind(null, book.id, locale)}>
+          <button className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground">
+            Publish book + all chapters
+          </button>
+        </form>
+        {book.is_published && (
+          <Link href={`/books/${book.id}`} className="text-sm underline">
+            View live →
+          </Link>
+        )}
+      </div>
 
       <Tabs defaultValue="details">
         <TabsList>
@@ -144,16 +178,21 @@ export default async function EditBookPage({
                 "down",
               );
 
+              const toggleWithIds = toggleChapterPublished.bind(
+                null,
+                chapter.id,
+                book.id,
+                locale,
+                chapter.is_published,
+              );
+
               return (
                 <AccordionItem
                   key={chapter.id}
                   value={chapter.id}
-                  className="rounded border px-4"
+                  className="rounded border px-4 space-between"
                 >
-                  {/* AccordionTrigger renders its own <button> — move/delete
-                      sit next to it as siblings instead of nesting inside it,
-                      since a <button> can't legally contain other buttons. */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex justify-between items-center">
                     <AccordionTrigger className="flex-1 hover:no-underline">
                       <span className="flex items-baseline gap-2 text-left">
                         <span className="text-sm text-muted-foreground">
@@ -166,22 +205,21 @@ export default async function EditBookPage({
                       </span>
                     </AccordionTrigger>
                     <div className="flex shrink-0 gap-2 text-sm">
-                      <form action={moveUp}>
-                        <button disabled={i === 0}>Move up</button>
-                      </form>
-                      <form action={moveDown}>
-                        <button disabled={i === chapters.length - 1}>
-                          Move down
-                        </button>
-                      </form>
-                      <form action={deleteWithIds}>
-                        <ConfirmSubmitButton
-                          confirmMessage={`Delete "${chapter.title}"? This can't be undone.`}
-                          className="text-destructive"
-                        >
-                          Delete
-                        </ConfirmSubmitButton>
-                      </form>
+                      <ChapterActionsMenu
+                        chapterTitle={chapter.title}
+                        isPublished={chapter.is_published}
+                        viewLiveHref={
+                          chapter.is_published && book.is_published
+                            ? `/books/${book.id}/chapters/${chapter.id}`
+                            : null
+                        }
+                        onTogglePublished={toggleWithIds}
+                        onDelete={deleteWithIds}
+                        onMoveUp={moveUp}
+                        onMoveDown={moveDown}
+                        chapterIndex={i}
+                        chapterCount={chapters.length}
+                      />
                     </div>
                   </div>
                   <AccordionContent className="space-y-2 pt-2">

@@ -5,6 +5,34 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+export async function toggleBookPublished(
+  bookid: string,
+  locale: string,
+  isPublished: boolean,
+) {
+  const supabase = await createClient();
+
+  await supabase
+    .from("books")
+    .update({ is_published: !isPublished })
+    .eq("id", bookid);
+  revalidatePath(`/${locale}/dashboard/books/${bookid}`);
+  redirect(`/${locale}`);
+}
+
+export async function publishBookAndChapters(bookId: string, locale: string) {
+  const supabase = await createClient();
+
+  await supabase.from("books").update({ is_published: true }).eq("id", bookId);
+  await supabase
+    .from("chapters")
+    .update({ is_published: true })
+    .eq("book_id", bookId);
+
+  revalidatePath(`/${locale}/dashboard/books/${bookId}`);
+  revalidatePath(`/${locale}`);
+}
+
 // Shared by createBook and updateBook — both need "take this File, put it at
 // this book's cover path, hand back the public URL," just at different
 // points (createBook only has a bookId *after* its insert; updateBook
