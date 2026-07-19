@@ -1,3 +1,4 @@
+import { CoverInput } from "@/components/cover-input";
 import { createBook } from "../actions";
 import { GenreSelect } from "@/components/genre-select";
 
@@ -34,6 +35,7 @@ export default async function NewBookPage({
         placeholder="Synopsis"
         className="w-full rounded border p-2"
       />
+      <CoverInput />
       <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
         Create draft
       </button>

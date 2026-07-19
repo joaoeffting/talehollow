@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-export function SaveChapterButton({
+export function SaveWithLoading({
   label = "Save chapter",
 }: {
   label?: string;

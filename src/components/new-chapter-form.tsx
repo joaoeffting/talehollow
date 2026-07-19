@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { RichTextEditor } from "@/components/rich-text-editor";
-import { SaveChapterButton } from "@/components/save-chapter-button";
+import { SaveWithLoading } from "@/components/save-with-loading";
 
 export function NewChapterForm({
   action,
@@ -38,7 +38,7 @@ export function NewChapterForm({
       />
       <RichTextEditor name="content" />
       <div className="flex gap-2">
-        <SaveChapterButton label="Add chapter" />
+        <SaveWithLoading label="Add chapter" />
         <button
           type="button"
           onClick={() => setOpen(false)}

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { updateBook, deleteBook } from "../actions";
+import { updateBook, deleteBook, removeCover } from "../actions";
 import {
   createChapter,
   updateChapter,
@@ -8,6 +8,7 @@ import {
   reorderChapter,
 } from "./chapters/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { CoverInput } from "@/components/cover-input";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { NewChapterForm } from "@/components/new-chapter-form";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -17,7 +18,8 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
-import { SaveChapterButton } from "@/components/save-chapter-button";
+import { SaveWithLoading } from "@/components/save-with-loading";
+import { GenreSelect } from "@/components/genre-select";
 
 export default async function EditBookPage({
   params,
@@ -41,6 +43,7 @@ export default async function EditBookPage({
 
   const updateWithId = updateBook.bind(null, book.id, locale);
   const deleteWithId = deleteBook.bind(null, book.id, locale);
+  const removeCoverWithId = removeCover.bind(null, book.id, locale);
 
   return (
     // Widened from Phase 4's max-w-md — a single-column book form fit fine
@@ -63,12 +66,14 @@ export default async function EditBookPage({
               defaultValue={book.title}
               className="w-full rounded border p-2"
             />
-            <input
-              name="genre"
-              defaultValue={book.genre}
+            <GenreSelect
+              key={book.genre} // force re-render when genre changes, so the select updates
+              required
               className="w-full rounded border p-2"
+              defaultValue={book.genre}
             />
             <select
+              key={book.language} // force re-render when language changes, so the select updates
               name="language"
               defaultValue={book.language}
               className="w-full rounded border p-2"
@@ -81,16 +86,19 @@ export default async function EditBookPage({
               defaultValue={book.synopsis ?? ""}
               className="w-full rounded border p-2"
             />
-            <input
-              name="cover_image_url"
-              defaultValue={book.cover_image_url ?? ""}
-              placeholder="Cover image URL"
-              className="w-full rounded border p-2"
-            />
-            <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
-              Save
-            </button>
+            <CoverInput initialUrl={book.cover_image_url} />
+            <SaveWithLoading label="Save book" />
           </form>
+          {book.cover_image_url && (
+            <form action={removeCoverWithId}>
+              <ConfirmSubmitButton
+                confirmMessage={`Remove the cover for "${book.title}"? This can't be undone.`}
+                className="text-sm text-destructive underline"
+              >
+                Remove Cover
+              </ConfirmSubmitButton>
+            </form>
+          )}
           <form action={deleteWithId}>
             <ConfirmSubmitButton
               confirmMessage={`Delete "${book.title}"? This deletes every chapter in it too — this can't be undone.`}
@@ -187,7 +195,7 @@ export default async function EditBookPage({
                         name="content"
                         defaultValue={chapter.content ?? ""}
                       />
-                      <SaveChapterButton />
+                      <SaveWithLoading />
                     </form>
                   </AccordionContent>
                 </AccordionItem>

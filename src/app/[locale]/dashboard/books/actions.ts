@@ -3,6 +3,45 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+// Shared by createBook and updateBook — both need "take this File, put it at
+// this book's cover path, hand back the public URL," just at different
+// points (createBook only has a bookId *after* its insert; updateBook
+// already has one).
+async function uploadBookCover(
+  supabase: SupabaseClient,
+  bookId: string,
+  cover: File,
+) {
+  const ext = cover.name.split(".").pop();
+  const path = `${bookId}/cover.${ext}`;
+  const { error } = await supabase.storage
+    .from("book-covers")
+    .upload(path, cover);
+  if (error) throw error;
+
+  // getPublicUrl is a pure string-builder (bucket + path), not a network
+  // call — safe to use immediately after the upload completes above.
+  const { data } = supabase.storage.from("book-covers").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+// Shared by updateBook (replacing a cover), removeCover, and deleteBook
+// (cleaning up on the way out) — all three need "whatever's currently in
+// this book's cover folder, gone," so it's pulled out rather than repeated
+// three times. Storage has no equivalent of SQL's `on delete cascade`, so
+// nothing does this automatically.
+async function deleteBookCoverFiles(supabase: SupabaseClient, bookId: string) {
+  const { data: existing } = await supabase.storage
+    .from("book-covers")
+    .list(bookId);
+  if (existing && existing.length > 0) {
+    await supabase.storage
+      .from("book-covers")
+      .remove(existing.map((file) => `${bookId}/${file.name}`));
+  }
+}
 
 export async function createBook(locale: string, formData: FormData) {
   const supabase = await createClient();
@@ -23,6 +62,12 @@ export async function createBook(locale: string, formData: FormData) {
 
   if (error) throw error;
 
+  const cover = formData.get("cover") as File | null;
+  if (cover && cover.size > 0) {
+    const cover_image_url = await uploadBookCover(supabase, book.id, cover);
+    await supabase.from("books").update({ cover_image_url }).eq("id", book.id);
+  }
+
   // revalidatePath tells Next.js to throw away its cached render of that
   // route and re-run the Server Component tree next time it's requested —
   // otherwise the dashboard list wouldn't show the new book without a
@@ -38,6 +83,17 @@ export async function updateBook(
 ) {
   const supabase = await createClient();
 
+  const cover = formData.get("cover") as File | null;
+  const coverUpdate: { cover_image_url?: string } = {};
+  if (cover && cover.size > 0) {
+    await deleteBookCoverFiles(supabase, bookId);
+    coverUpdate.cover_image_url = await uploadBookCover(
+      supabase,
+      bookId,
+      cover,
+    );
+  }
+
   await supabase
     .from("books")
     .update({
@@ -45,13 +101,26 @@ export async function updateBook(
       genre: formData.get("genre") as string,
       language: formData.get("language") as string,
       synopsis: formData.get("synopsis") as string,
-      cover_image_url: formData.get("cover_image_url") as string,
+      ...coverUpdate,
     })
     .eq("id", bookId);
   // No .eq('author_id', ...) filter needed here — the RLS update policy
   // from step 1 already silently no-ops this query if bookId isn't yours.
 
   revalidatePath(`/${locale}/dashboard`);
+  revalidatePath(`/${locale}/dashboard/books/${bookId}`);
+}
+
+// The counterpart to uploading a cover — lets an author go back to having no
+// cover at all, rather than "upload a new one" being the only way to change
+// anything about it.
+export async function removeCover(bookId: string, locale: string) {
+  const supabase = await createClient();
+  await deleteBookCoverFiles(supabase, bookId);
+  await supabase
+    .from("books")
+    .update({ cover_image_url: null })
+    .eq("id", bookId);
   revalidatePath(`/${locale}/dashboard/books/${bookId}`);
 }
 
