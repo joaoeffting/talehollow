@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { Eye, ThumbsUp } from "lucide-react";
+import { Eye, ThumbsUp, MessageCircle } from "lucide-react";
 
 export default async function PublicBookPage({
   params,
@@ -53,6 +53,11 @@ export default async function PublicBookPage({
     chapterViews?.reduce((sum, c) => sum + c.anon_view_count, 0) ?? 0;
   const totalViews = viewCount + totalAnonViews;
 
+  const { count: commentCount } = await supabase
+    .from("comments")
+    .select("*", { count: "exact", head: true })
+    .eq("book_id", id);
+
   return (
     <div className="space-y-6 py-12">
       <div>
@@ -78,6 +83,10 @@ export default async function PublicBookPage({
         <span className="flex items-center gap-1.5">
           <ThumbsUp className="h-4 w-4" aria-hidden="true" />
           {likeCount ?? 0} {likeCount === 1 ? "like" : "likes"}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <MessageCircle className="h-4 w-4" aria-hidden="true" />
+          {commentCount ?? 0} {commentCount === 1 ? "comment" : "comments"}
         </span>
       </div>
       <div>

@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { ViewTracker } from "./view-tracker";
 import { LikeButton } from "./like-button";
+import { CommentSection } from "./comment-section";
 
 export default async function ChapterPage({
   params,
@@ -55,6 +56,14 @@ export default async function ChapterPage({
   const prev = chapters[index - 1]; // undefined if this is the first chapter
   const next = chapters[index + 1]; // undefined if this is the last chapter
 
+  const { data: comments } = await supabase
+    .from("comments")
+    .select(
+      "id, content, created_at, user_id, profiles(username, display_name)",
+    )
+    .eq("chapter_id", chapter.id)
+    .order("created_at", { ascending: false });
+
   return (
     <article className="space-y-6 py-6">
       {!claims?.claims && <ViewTracker chapterId={chapter.id} />}
@@ -75,6 +84,13 @@ export default async function ChapterPage({
         locale={locale}
         initialCount={chapterLikeCount ?? 0}
         initialIsLiked={isLiked}
+      />
+      <CommentSection
+        chapterId={chapter.id}
+        bookId={id}
+        locale={locale}
+        currentUserId={claims?.claims?.sub ?? null}
+        comments={comments ?? []}
       />
       <div className="flex justify-between border-t pt-4 text-sm">
         {prev ? (
