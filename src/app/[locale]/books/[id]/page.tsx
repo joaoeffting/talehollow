@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { Eye, ThumbsUp } from "lucide-react";
 
 export default async function PublicBookPage({
   params,
@@ -30,6 +31,28 @@ export default async function PublicBookPage({
     .eq("is_published", true)
     .order("position");
 
+  const { data: viewRows } = await supabase
+    .from("views")
+    .select("view_count")
+    .eq("book_id", id);
+
+  const viewCount = viewRows?.reduce((sum, v) => sum + v.view_count, 0) ?? 0;
+
+  const { data: chapterViews } = await supabase
+    .from("chapters")
+    .select("anon_view_count")
+    .eq("book_id", id)
+    .eq("is_published", true);
+
+  const { count: likeCount } = await supabase
+    .from("likes")
+    .select("*", { count: "exact", head: true })
+    .eq("book_id", id);
+
+  const totalAnonViews =
+    chapterViews?.reduce((sum, c) => sum + c.anon_view_count, 0) ?? 0;
+  const totalViews = viewCount + totalAnonViews;
+
   return (
     <div className="space-y-6 py-12">
       <div>
@@ -45,6 +68,17 @@ export default async function PublicBookPage({
           by {book.profiles.display_name} · {book.genre}
         </p>
         <p className="mt-4">{book.synopsis}</p>
+      </div>
+      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <Eye className="h-4 w-4" aria-hidden="true" />
+          {/* "1 views" reads as a typo, not a feature — worth the ternary. */}
+          {totalViews} {totalViews === 1 ? "view" : "views"}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <ThumbsUp className="h-4 w-4" aria-hidden="true" />
+          {likeCount ?? 0} {likeCount === 1 ? "like" : "likes"}
+        </span>
       </div>
       <div>
         <h2 className="mb-2 text-xl font-semibold">Chapters</h2>

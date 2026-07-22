@@ -13,6 +13,17 @@ export async function proxy(request: NextRequest) {
   // Supabase session refresh onto that same response rather than building a
   // second, unrelated one that would clobber the locale rewrite.
   const response = handleI18nRouting(request);
+
+  if (!request.cookies.has("anon_id")) {
+    // One per browser, kept for a year — this is the dedupe key
+    // record_anon_view() uses in place of user_id for logged-out visitors.
+    response.cookies.set("anon_id", crypto.randomUUID(), {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+  }
+
   return updateSession(request, response);
 }
 

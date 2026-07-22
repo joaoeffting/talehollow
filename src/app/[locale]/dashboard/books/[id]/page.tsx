@@ -120,7 +120,7 @@ export default async function EditBookPage({
               defaultValue={book.synopsis ?? ""}
               className="w-full rounded border p-2"
             />
-            <CoverInput initialUrl={book.cover_image_url} />
+            <CoverInput initialUrl={book?.cover_image_url || undefined} />
             <SaveWithLoading label="Save book" />
           </form>
           {book.cover_image_url && (

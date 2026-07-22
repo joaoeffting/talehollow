@@ -4,6 +4,20 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+
+export async function recordAnonymousView(chapterId: string) {
+  const cookieStore = await cookies();
+  const anonId = cookieStore.get("anon_id")?.value;
+
+  if (!anonId) return;
+
+  const supabase = await createClient();
+  await supabase.rpc("record_anon_view", {
+    p_chapter_id: chapterId,
+    p_viewer_key: anonId,
+  });
+}
 
 export async function toggleBookPublished(
   bookid: string,

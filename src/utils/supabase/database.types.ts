@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      anon_view_dedup: {
+        Row: {
+          chapter_id: string
+          view_date: string
+          viewer_key: string
+        }
+        Insert: {
+          chapter_id: string
+          view_date?: string
+          viewer_key: string
+        }
+        Update: {
+          chapter_id?: string
+          view_date?: string
+          viewer_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anon_view_dedup_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       books: {
         Row: {
           author_id: string
@@ -66,6 +92,7 @@ export type Database = {
       }
       chapters: {
         Row: {
+          anon_view_count: number
           book_id: string
           content: string | null
           created_at: string | null
@@ -75,6 +102,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          anon_view_count?: number
           book_id: string
           content?: string | null
           created_at?: string | null
@@ -84,6 +112,7 @@ export type Database = {
           title: string
         }
         Update: {
+          anon_view_count?: number
           book_id?: string
           content?: string | null
           created_at?: string | null
@@ -98,6 +127,52 @@ export type Database = {
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      likes: {
+        Row: {
+          book_id: string
+          chapter_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          chapter_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          chapter_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "likes_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -135,12 +210,66 @@ export type Database = {
         }
         Relationships: []
       }
+      views: {
+        Row: {
+          book_id: string
+          chapter_id: string
+          last_viewed_at: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          book_id: string
+          chapter_id: string
+          last_viewed_at?: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          book_id?: string
+          chapter_id?: string
+          last_viewed_at?: string
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "views_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "views_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      record_anon_view: {
+        Args: { p_chapter_id: string; p_viewer_key: string }
+        Returns: undefined
+      }
       record_chapter_publish: { Args: { p_book_id: string }; Returns: boolean }
+      record_view: {
+        Args: { p_book_id: string; p_chapter_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
