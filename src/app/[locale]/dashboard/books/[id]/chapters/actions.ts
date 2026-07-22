@@ -10,11 +10,22 @@ export async function toggleChapterPublished(
   isPublished: boolean,
 ) {
   const supabase = await createClient();
+  const nowPublishing = !isPublished;
+
   await supabase
     .from("chapters")
-    .update({ is_published: !isPublished })
+    .update({ is_published: nowPublishing })
     .eq("id", chapterId);
+
+  if (nowPublishing) {
+    await supabase
+      .from("books")
+      .update({ last_updated_at: new Date().toISOString() })
+      .eq("id", bookId);
+  }
+
   revalidatePath(`/${locale}/dashboard/books/${bookId}`);
+  revalidatePath(`/${locale}`);
 }
 
 export async function createChapter(
