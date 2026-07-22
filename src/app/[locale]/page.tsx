@@ -27,7 +27,7 @@ export default async function HomePage({
     .eq("is_published", true)
     .eq("language", contentLanguage)
 
-    .order("last_updated_at", { ascending: false })
+    .order("last_pushed_at", { ascending: false })
     .limit(20);
 
   return (

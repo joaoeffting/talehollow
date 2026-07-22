@@ -140,7 +140,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      record_chapter_publish: { Args: { p_book_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

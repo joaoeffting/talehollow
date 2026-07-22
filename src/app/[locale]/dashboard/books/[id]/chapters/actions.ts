@@ -18,10 +18,7 @@ export async function toggleChapterPublished(
     .eq("id", chapterId);
 
   if (nowPublishing) {
-    await supabase
-      .from("books")
-      .update({ last_updated_at: new Date().toISOString() })
-      .eq("id", bookId);
+    await supabase.rpc("record_chapter_publish", { p_book_id: bookId });
   }
 
   revalidatePath(`/${locale}/dashboard/books/${bookId}`);
