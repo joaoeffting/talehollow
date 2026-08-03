@@ -41,9 +41,21 @@ export default async function RootLayout({
             <PostHogPageview />
             <header className="border-b">
               <div className="mx-auto flex max-w-5xl items-center justify-between p-4">
-                <Link href="/" className="text-lg font-semibold">
-                  Storyloom
-                </Link>
+                <div className="flex items-center gap-6">
+                  <Link href="/" className="text-lg font-semibold">
+                    Storyloom
+                  </Link>
+                  {/* Defaults to the current UI locale as the ranking language segment —
+        same fallback the homepage feed (Phase 7) uses for a visitor with no
+        explicit content-language preference. There's no cross-language
+        switcher inside rankings yet, so this is the only entry point. */}
+                  <Link
+                    href={`/rankings/${locale}`}
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    Rankings
+                  </Link>
+                </div>
                 <NavAuthLinks locale={locale} />
               </div>
             </header>

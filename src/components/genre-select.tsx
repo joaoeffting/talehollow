@@ -1,4 +1,4 @@
-const GENRES = [
+export const GENRES = [
   { value: "fantasy", label: "Fantasy" },
   { value: "science-fiction", label: "Science Fiction" },
   { value: "romance", label: "Romance" },
