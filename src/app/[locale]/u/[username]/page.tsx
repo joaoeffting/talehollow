@@ -7,6 +7,7 @@ import { EditableProfileHeader } from "@/components/editable-profile-header";
 import { FollowButton } from "@/components/follow-button";
 import { ScrapbookSection } from "@/components/scrapbook-section";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { withSlug } from "@/lib/slug";
 import { updateProfile } from "./actions";
 
 // Same avatar-plus-name row used for both the Followers and Following
@@ -38,12 +39,23 @@ function ProfileListItem({
   );
 }
 
+const TAB_VALUES = ["books", "scrapbook", "followers", "following"] as const;
+
 export default async function ProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; username: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const { locale, username } = await params;
+  const { tab } = await searchParams;
+  // Lets a link jump straight to a specific tab (e.g. a reported scrapbook
+  // entry from the admin reports page) via ?tab=scrapbook — falls back to
+  // "books" for anything missing or not one of the real tab values.
+  const initialTab = TAB_VALUES.includes(tab as (typeof TAB_VALUES)[number])
+    ? (tab as (typeof TAB_VALUES)[number])
+    : "books";
   const supabase = await createClient();
 
   const { data: profile } = await supabase
@@ -117,7 +129,7 @@ export default async function ProfilePage({
         )}
       </div>
 
-      <Tabs defaultValue="books">
+      <Tabs defaultValue={initialTab}>
         <TabsList>
           <TabsTrigger value="books">Books</TabsTrigger>
           <TabsTrigger value="scrapbook">Scrapbook</TabsTrigger>
@@ -134,7 +146,7 @@ export default async function ProfilePage({
             {books?.map((book) => (
               <BookListItem
                 key={book.id}
-                href={`/books/${book.id}`}
+                href={`/books/${withSlug(book.id, book.title)}`}
                 coverImageUrl={book.cover_image_url}
                 title={book.title}
                 meta={book.genre}

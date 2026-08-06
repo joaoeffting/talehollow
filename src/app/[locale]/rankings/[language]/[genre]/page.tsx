@@ -2,6 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { BookListItem } from "@/components/book-list-item";
 import { GENRES } from "@/components/genre-select";
+import { withSlug } from "@/lib/slug";
 
 export default async function GenreRankingPage({
   params,
@@ -29,7 +30,7 @@ export default async function GenreRankingPage({
         {rankings?.map((book, i) => (
           <BookListItem
             key={book.id}
-            href={`/books/${book.id}`}
+            href={`/books/${withSlug(book.id, book.title)}`}
             coverImageUrl={book.cover_image_url}
             title={book.title}
             leading={

@@ -21,10 +21,12 @@ export async function NavAuthLinks({ locale }: { locale: string }) {
   }
 
   // Just enough profile data to render the avatar — image if the user has
-  // set one (Phase 13), initials as a fallback otherwise.
+  // set one (Phase 13), initials as a fallback otherwise. is_admin (Phase
+  // 16) rides along here too, so the hamburger menu can decide whether to
+  // show the Admin entry.
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, display_name, avatar_url")
+    .select("username, display_name, avatar_url, is_admin")
     .eq("id", data.claims.sub)
     .single();
 
@@ -53,7 +55,7 @@ export async function NavAuthLinks({ locale }: { locale: string }) {
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
       </Link>
-      <NavMenu locale={locale} />
+      <NavMenu locale={locale} isAdmin={profile?.is_admin ?? false} />
     </div>
   );
 }

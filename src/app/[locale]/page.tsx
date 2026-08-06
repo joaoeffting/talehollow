@@ -1,6 +1,7 @@
 import { BookListItem } from "@/components/book-list-item";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { withSlug } from "@/lib/slug";
 
 export default async function HomePage({
   params,
@@ -44,7 +45,7 @@ export default async function HomePage({
         {books?.map((book) => (
           <BookListItem
             key={book.id}
-            href={`/books/${book.id}`}
+            href={`/books/${withSlug(book.id, book.title)}`}
             coverImageUrl={book.cover_image_url}
             title={book.title}
             meta={

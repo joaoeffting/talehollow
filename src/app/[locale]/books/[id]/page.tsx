@@ -2,14 +2,17 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { Eye, ThumbsUp, MessageCircle } from "lucide-react";
+import { ReportButton } from "@/components/report-button";
+import { withSlug } from "@/lib/slug";
 
 export default async function PublicBookPage({
   params,
 }: {
   params: Promise<{ locale: string; id: string }>;
 }) {
-  const { id } = await params;
+  const { id, locale } = await params;
   const supabase = await createClient();
+  const { data: claims } = await supabase.auth.getClaims();
 
   // Two conditions in the query, not one: RLS already hides unpublished
   // books from other users, but the explicit .eq('is_published', true) here
@@ -95,6 +98,9 @@ export default async function PublicBookPage({
           <MessageCircle className="h-4 w-4" aria-hidden="true" />
           {commentCount ?? 0} {commentCount === 1 ? "comment" : "comments"}
         </span>
+        {claims?.claims && (
+          <ReportButton targetType="book" targetId={book.id} locale={locale} />
+        )}
       </div>
       <div>
         <h2 className="mb-2 text-xl font-semibold">Chapters</h2>
@@ -102,7 +108,7 @@ export default async function PublicBookPage({
           {chapters?.map((chapter) => (
             <li key={chapter.id} className="p-3">
               <Link
-                href={`/books/${id}/chapters/${chapter.id}`}
+                href={`/books/${withSlug(id, book.title)}/chapters/${withSlug(chapter.id, chapter.title)}`}
                 className="text-primary underline underline-offset-4 hover:text-accent"
               >
                 {chapter.position}. {chapter.title}

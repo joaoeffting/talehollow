@@ -24,6 +24,7 @@ import { toggleBookPublished, publishBookAndChapters } from "../actions";
 import { Link } from "@/i18n/navigation";
 import { toggleChapterPublished } from "./chapters/actions";
 import { ChapterActionsMenu } from "@/components/chapter-actions-menu";
+import { withSlug } from "@/lib/slug";
 
 export default async function EditBookPage({
   params,
@@ -80,7 +81,10 @@ export default async function EditBookPage({
           </button>
         </form>
         {book.is_published && (
-          <Link href={`/books/${book.id}`} className="text-sm underline">
+          <Link
+            href={`/books/${withSlug(book.id, book.title)}`}
+            className="text-sm underline"
+          >
             View live →
           </Link>
         )}

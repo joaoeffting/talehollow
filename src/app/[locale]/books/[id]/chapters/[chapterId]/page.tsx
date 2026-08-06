@@ -4,6 +4,8 @@ import { createClient } from "@/utils/supabase/server";
 import { ViewTracker } from "./view-tracker";
 import { LikeButton } from "./like-button";
 import { CommentSection } from "./comment-section";
+import { ReportButton } from "@/components/report-button";
+import { withSlug } from "@/lib/slug";
 
 export default async function ChapterPage({
   params,
@@ -20,6 +22,15 @@ export default async function ChapterPage({
       p_book_id: id,
     });
   }
+
+  // Only needed for the book-link slug below (title text, not the id) —
+  // everything else on this page already keys off the raw book id `id`.
+  const { data: book } = await supabase
+    .from("books")
+    .select("title")
+    .eq("id", id)
+    .single();
+  if (!book) notFound();
 
   // Fetch the whole published chapter list (not just this one chapter) so
   // we can compute prev/next by array position, rather than issuing two
@@ -68,7 +79,7 @@ export default async function ChapterPage({
     <article className="space-y-6 py-6">
       {!claims?.claims && <ViewTracker chapterId={chapter.id} />}
       <Link
-        href={`/books/${id}`}
+        href={`/books/${withSlug(id, book.title)}`}
         className="text-md text-muted-foreground underline underline-offset-4 hover:text-accent"
       >
         ← Go back to book
@@ -78,13 +89,22 @@ export default async function ChapterPage({
         className="prose max-w-none"
         dangerouslySetInnerHTML={{ __html: chapter.content ?? "" }}
       />
-      <LikeButton
-        chapterId={chapter.id}
-        bookId={id}
-        locale={locale}
-        initialCount={chapterLikeCount ?? 0}
-        initialIsLiked={isLiked}
-      />
+      <div className="flex items-center gap-4">
+        <LikeButton
+          chapterId={chapter.id}
+          bookId={id}
+          locale={locale}
+          initialCount={chapterLikeCount ?? 0}
+          initialIsLiked={isLiked}
+        />
+        {claims?.claims && (
+          <ReportButton
+            targetType="chapter"
+            targetId={chapter.id}
+            locale={locale}
+          />
+        )}
+      </div>
       <CommentSection
         chapterId={chapter.id}
         bookId={id}
@@ -95,7 +115,7 @@ export default async function ChapterPage({
       <div className="flex justify-between border-t pt-4 text-sm">
         {prev ? (
           <Link
-            href={`/books/${id}/chapters/${prev.id}`}
+            href={`/books/${withSlug(id, book.title)}/chapters/${withSlug(prev.id, prev.title)}`}
             className="text-primary underline underline-offset-4 hover:text-accent"
           >
             ← {prev.title}
@@ -105,7 +125,7 @@ export default async function ChapterPage({
         )}
         {next ? (
           <Link
-            href={`/books/${id}/chapters/${next.id}`}
+            href={`/books/${withSlug(id, book.title)}/chapters/${withSlug(next.id, next.title)}`}
             className="text-primary underline underline-offset-4 hover:text-accent"
           >
             {next.title} →

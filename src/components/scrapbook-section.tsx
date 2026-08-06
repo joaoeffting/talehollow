@@ -3,6 +3,7 @@
 import { useOptimistic, useRef } from "react";
 import { Trash2 } from "lucide-react";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { ReportButton } from "@/components/report-button";
 import { SaveWithLoading } from "@/components/save-with-loading";
 import { postScrapbookEntry, deleteScrapbookEntry } from "@/app/[locale]/u/[username]/actions";
 
@@ -73,30 +74,42 @@ export function ScrapbookSection({
           // just fails silently when clicked.
           const canDelete =
             currentUserId === entry.author_id || currentUserId === profileId;
+          // The optimistic placeholder's id isn't a real row id yet — no
+          // point offering to report something that doesn't exist server-side.
+          const isOptimistic = entry.id.startsWith("optimistic-");
           return (
             <li key={entry.id} className="rounded border p-3">
               <p className="text-sm font-medium">
                 {entry.profiles.display_name}
               </p>
               <p>{entry.content}</p>
-              {canDelete && (
-                <form
-                  action={deleteScrapbookEntry.bind(
-                    null,
-                    entry.id,
-                    username,
-                    locale,
-                  )}
-                >
-                  <ConfirmSubmitButton
-                    confirmMessage="Delete this note? This can't be undone."
-                    className="mt-1 flex items-center gap-1 text-xs text-destructive"
+              <div className="mt-1 flex items-center gap-3">
+                {canDelete && (
+                  <form
+                    action={deleteScrapbookEntry.bind(
+                      null,
+                      entry.id,
+                      username,
+                      locale,
+                    )}
                   >
-                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    Delete
-                  </ConfirmSubmitButton>
-                </form>
-              )}
+                    <ConfirmSubmitButton
+                      confirmMessage="Delete this note? This can't be undone."
+                      className="flex items-center gap-1 text-xs text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      Delete
+                    </ConfirmSubmitButton>
+                  </form>
+                )}
+                {currentUserId && !isOptimistic && (
+                  <ReportButton
+                    targetType="scrapbook_entry"
+                    targetId={entry.id}
+                    locale={locale}
+                  />
+                )}
+              </div>
             </li>
           );
         })}

@@ -19,7 +19,13 @@ import { logout } from "@/app/[locale]/login/actions";
 // Every later phase that needs a new nav destination (Settings in Phase 3,
 // Dashboard in Phase 4, Notifications in Phase 15) adds one more
 // DropdownMenuItem here instead of a new link in the header.
-export function NavMenu({ locale }: { locale: string }) {
+export function NavMenu({
+  locale,
+  isAdmin,
+}: {
+  locale: string;
+  isAdmin: boolean;
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -45,6 +51,14 @@ export function NavMenu({ locale }: { locale: string }) {
         <DropdownMenuItem
           render={<Link href="/notifications">Notifications</Link>}
         ></DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              render={<Link href="/admin/reports">Admin</Link>}
+            ></DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout(locale)}>
           Log out

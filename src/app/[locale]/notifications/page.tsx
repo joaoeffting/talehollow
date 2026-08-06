@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { BookOpen, MessageCircle, ThumbsUp, UserPlus } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { withSlug } from "@/lib/slug";
 
 export default async function NotificationsPage({
   params,
@@ -16,7 +17,7 @@ export default async function NotificationsPage({
   const { data: notifications } = await supabase
     .from("notifications")
     .select(
-      "id, created_at, type, chapter_id, books(id, title), profiles!notifications_actor_id_fkey(username, display_name)",
+      "id, created_at, type, chapter_id, books(id, title), chapters(title), profiles!notifications_actor_id_fkey(username, display_name)",
     )
     .eq("user_id", data.claims.sub) // RLS already restricts to this, but explicit here for clarity
     .order("created_at", { ascending: false });
@@ -44,24 +45,24 @@ export default async function NotificationsPage({
               {n.profiles?.display_name}
             </Link>
           );
-          const bookLink = (
+          const bookLink = n.books && (
             <Link
-              href={`/books/${n.books?.id}`}
+              href={`/books/${withSlug(n.books.id, n.books.title)}`}
               className="text-primary underline underline-offset-4 hover:text-accent"
             >
-              {n.books?.title}
+              {n.books.title}
             </Link>
           );
           // Links straight to the specific chapter that was liked/commented
           // on, not just its book — chapter_id is only ever set for those
           // two notification types, chapter_published still only knows the
           // book.
-          const chapterLink = (
+          const chapterLink = n.books && n.chapter_id && (
             <Link
-              href={`/books/${n.books?.id}/chapters/${n.chapter_id}`}
+              href={`/books/${withSlug(n.books.id, n.books.title)}/chapters/${withSlug(n.chapter_id, n.chapters?.title ?? "")}`}
               className="text-primary underline underline-offset-4 hover:text-accent"
             >
-              {n.books?.title}
+              {n.books.title}
             </Link>
           );
 
