@@ -37,7 +37,11 @@ export function LikeButton({
 
   return (
     <form action={formAction}>
-      <button className="flex items-center gap-1.5 rounded border px-3 py-1 text-sm">
+      <button
+        aria-label="Like this chapter"
+        aria-pressed={state.isLiked}
+        className="flex items-center gap-1.5 rounded border px-3 py-1 text-sm"
+      >
         <ThumbsUp
           className={cn("h-4 w-4", state.isLiked && "fill-current text-primary")}
         />
