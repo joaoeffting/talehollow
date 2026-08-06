@@ -63,7 +63,7 @@ export function ChapterActionsMenu({
           </form>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={onTogglePublished}>
+        <DropdownMenuItem onClick={onTogglePublished}>
           {isPublished ? "Unpublish" : "Publish"}
         </DropdownMenuItem>
         {viewLiveHref && (
@@ -76,10 +76,10 @@ export function ChapterActionsMenu({
             for a ConfirmSubmitButton (Phase 4) to intercept the way the book
             and cover deletes do — confirm() just gates the direct call to
             onDelete instead, same as nav-menu.tsx calling logout() directly
-            from onSelect. */}
+            from onClick. */}
         <DropdownMenuItem
           className="text-destructive"
-          onSelect={() => {
+          onClick={() => {
             if (confirm(`Delete "${chapterTitle}"? This can't be undone.`))
               onDelete();
           }}

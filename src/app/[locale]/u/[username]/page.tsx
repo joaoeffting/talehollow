@@ -1,10 +1,42 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { Link } from "@/i18n/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BookListItem } from "@/components/book-list-item";
 import { EditableProfileHeader } from "@/components/editable-profile-header";
+import { FollowButton } from "@/components/follow-button";
 import { ScrapbookSection } from "@/components/scrapbook-section";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { updateProfile } from "./actions";
+
+// Same avatar-plus-name row used for both the Followers and Following
+// tabs — kept local and non-exported since profile-list-item shape isn't
+// needed anywhere else in the app yet.
+function ProfileListItem({
+  username,
+  displayName,
+  avatarUrl,
+}: {
+  username: string;
+  displayName: string;
+  avatarUrl: string | null;
+}) {
+  const initials = (displayName ?? username ?? "?").slice(0, 2).toUpperCase();
+  return (
+    <li className="flex items-center gap-3 p-4">
+      <Avatar className="h-9 w-9">
+        <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
+        <AvatarFallback>{initials}</AvatarFallback>
+      </Avatar>
+      <Link
+        href={`/u/${username}`}
+        className="font-medium text-primary underline underline-offset-4 hover:text-accent"
+      >
+        {displayName}
+      </Link>
+    </li>
+  );
+}
 
 export default async function ProfilePage({
   params,
@@ -43,18 +75,58 @@ export default async function ProfilePage({
     .eq("profile_id", profile.id)
     .order("created_at", { ascending: false });
 
+  // Only relevant to a signed-in visitor looking at someone else's page —
+  // skipped entirely for the owner (Follow yourself makes no sense) and for
+  // logged-out visitors (claims.sub would be undefined anyway).
+  let isFollowing = false;
+  if (claims?.claims && !isOwner) {
+    const { data: existingFollow } = await supabase
+      .from("follows")
+      .select("*")
+      .eq("follower_id", claims.claims.sub)
+      .eq("followed_id", profile.id)
+      .maybeSingle();
+    isFollowing = !!existingFollow;
+  }
+
+  const { data: followers } = await supabase
+    .from("follows")
+    .select("profiles!follows_follower_id_fkey(username, display_name, avatar_url)")
+    .eq("followed_id", profile.id);
+
+  const { data: following } = await supabase
+    .from("follows")
+    .select("profiles!follows_followed_id_fkey(username, display_name, avatar_url)")
+    .eq("follower_id", profile.id);
+
   return (
     <div className="space-y-8 py-12">
-      <EditableProfileHeader
-        profile={profile}
-        isOwner={isOwner}
-        onSave={updateWithUsername}
-      />
+      <div className="flex items-start justify-between gap-4">
+        <EditableProfileHeader
+          profile={profile}
+          isOwner={isOwner}
+          onSave={updateWithUsername}
+        />
+        {claims?.claims && !isOwner && (
+          <FollowButton
+            followedId={profile.id}
+            username={username}
+            locale={locale}
+            initialIsFollowing={isFollowing}
+          />
+        )}
+      </div>
 
       <Tabs defaultValue="books">
         <TabsList>
           <TabsTrigger value="books">Books</TabsTrigger>
           <TabsTrigger value="scrapbook">Scrapbook</TabsTrigger>
+          <TabsTrigger value="followers">
+            Followers ({followers?.length ?? 0})
+          </TabsTrigger>
+          <TabsTrigger value="following">
+            Following ({following?.length ?? 0})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="books">
@@ -84,6 +156,42 @@ export default async function ProfilePage({
             currentUserId={claims?.claims?.sub ?? null}
             entries={entries ?? []}
           />
+        </TabsContent>
+
+        <TabsContent value="followers">
+          <ul className="divide-y rounded border">
+            {followers?.map((f) => (
+              <ProfileListItem
+                key={f.profiles.username}
+                username={f.profiles.username}
+                displayName={f.profiles.display_name}
+                avatarUrl={f.profiles.avatar_url}
+              />
+            ))}
+            {followers?.length === 0 && (
+              <li className="p-4 text-sm text-muted-foreground">
+                No followers yet.
+              </li>
+            )}
+          </ul>
+        </TabsContent>
+
+        <TabsContent value="following">
+          <ul className="divide-y rounded border">
+            {following?.map((f) => (
+              <ProfileListItem
+                key={f.profiles.username}
+                username={f.profiles.username}
+                displayName={f.profiles.display_name}
+                avatarUrl={f.profiles.avatar_url}
+              />
+            ))}
+            {following?.length === 0 && (
+              <li className="p-4 text-sm text-muted-foreground">
+                Not following anyone yet.
+              </li>
+            )}
+          </ul>
         </TabsContent>
       </Tabs>
     </div>

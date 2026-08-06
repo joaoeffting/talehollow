@@ -59,7 +59,7 @@ export default async function ChapterPage({
   const { data: comments } = await supabase
     .from("comments")
     .select(
-      "id, content, created_at, user_id, profiles(username, display_name)",
+      "id, content, created_at, user_id, profiles(username, display_name, avatar_url)",
     )
     .eq("chapter_id", chapter.id)
     .order("created_at", { ascending: false });

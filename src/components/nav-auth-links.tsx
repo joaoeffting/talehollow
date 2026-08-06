@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { NotificationBell } from "@/components/notification-bell";
 import { NavMenu } from "./nav-menu";
 
 // A small async Server Component just for this check, so the rest of the
@@ -31,8 +32,18 @@ export async function NavAuthLinks({ locale }: { locale: string }) {
     .slice(0, 2)
     .toUpperCase();
 
+  const { count: unreadCount } = await supabase
+    .from("notifications")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", data.claims.sub)
+    .is("read_at", null);
+
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3">
+      <NotificationBell
+        userId={data.claims.sub}
+        initialUnreadCount={unreadCount ?? 0}
+      />
       <Link href="/account" aria-label="Your account">
         <Avatar className="h-8 w-8">
           <AvatarImage

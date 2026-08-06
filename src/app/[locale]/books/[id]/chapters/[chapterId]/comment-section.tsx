@@ -1,15 +1,23 @@
 "use client";
 
 import { useOptimistic, useRef } from "react";
+import { useFormatter } from "next-intl";
 import { MessageCircle, Send, Trash2 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { postComment, deleteComment } from "../../../actions";
 
 type Comment = {
   id: string;
   content: string;
+  created_at: string;
   user_id: string;
-  profiles: { username: string; display_name: string };
+  profiles: {
+    username: string;
+    display_name: string;
+    avatar_url: string | null;
+  };
 };
 
 export function CommentSection({
@@ -26,6 +34,7 @@ export function CommentSection({
   comments: Comment[];
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const format = useFormatter();
 
   // Appends a placeholder comment the instant the form submits, rather than
   // waiting for the insert + revalidatePath round trip. The real row (with
@@ -38,8 +47,9 @@ export function CommentSection({
       {
         id: `optimistic-${Date.now()}`,
         content,
+        created_at: new Date().toISOString(),
         user_id: currentUserId ?? "",
-        profiles: { username: "", display_name: "You" },
+        profiles: { username: "", display_name: "You", avatar_url: null },
       },
       ...state,
     ],
@@ -82,36 +92,69 @@ export function CommentSection({
       )}
 
       <ul className="space-y-3">
-        {optimisticComments.map((comment) => (
-          <li key={comment.id} className="rounded border p-3">
-            <p className="text-sm font-medium">
-              {comment.profiles.display_name}
-            </p>
-            <p>{comment.content}</p>
-            {/* Only the comment's own author ever sees a Delete button —
-                RLS would block anyone else's attempt anyway, but the UI
-                shouldn't offer an action it knows will silently fail. */}
-            {comment.user_id === currentUserId && (
-              <form
-                action={deleteComment.bind(
-                  null,
-                  comment.id,
-                  chapterId,
-                  bookId,
-                  locale,
+        {optimisticComments.map((comment) => {
+          const initials = comment.profiles.display_name
+            .slice(0, 2)
+            .toUpperCase();
+          return (
+            <li key={comment.id} className="flex gap-3 rounded border p-3">
+              <Avatar className="h-8 w-8 shrink-0">
+                <AvatarImage
+                  src={comment.profiles.avatar_url ?? undefined}
+                  alt={comment.profiles.display_name}
+                />
+                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <p className="flex items-baseline gap-2 text-sm font-medium">
+                  {/* No username yet on the optimistic placeholder (it only
+                    knows "You" until the real row lands) — plain text
+                    instead of a link so there's nothing to click through to
+                    a broken /u/ page in that brief window. */}
+                  {comment.profiles.username ? (
+                    <Link
+                      href={`/u/${comment.profiles.username}`}
+                      className="hover:underline"
+                    >
+                      {comment.profiles.display_name}
+                    </Link>
+                  ) : (
+                    comment.profiles.display_name
+                  )}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {format.dateTime(new Date(comment.created_at), {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </span>
+                </p>
+                <p>{comment.content}</p>
+                {/* Only the comment's own author ever sees a Delete button —
+                  RLS would block anyone else's attempt anyway, but the UI
+                  shouldn't offer an action it knows will silently fail. */}
+                {comment.user_id === currentUserId && (
+                  <form
+                    action={deleteComment.bind(
+                      null,
+                      comment.id,
+                      chapterId,
+                      bookId,
+                      locale,
+                    )}
+                  >
+                    <ConfirmSubmitButton
+                      confirmMessage="Delete this comment? This can't be undone."
+                      className="mt-1 flex items-center gap-1 text-xs text-destructive"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      Delete
+                    </ConfirmSubmitButton>
+                  </form>
                 )}
-              >
-                <ConfirmSubmitButton
-                  confirmMessage="Delete this comment? This can't be undone."
-                  className="mt-1 flex items-center gap-1 text-xs text-destructive"
-                >
-                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                  Delete
-                </ConfirmSubmitButton>
-              </form>
-            )}
-          </li>
-        ))}
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

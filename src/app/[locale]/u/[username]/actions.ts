@@ -98,3 +98,46 @@ export async function deleteScrapbookEntry(
   await supabase.from("scrapbook_entries").delete().eq("id", entryId);
   revalidatePath(`/${locale}/u/${username}`);
 }
+
+export async function toggleFollow(
+  followedId: string,
+  username: string,
+  locale: string,
+) {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims) return;
+  const followerId = data.claims.sub;
+
+  // Same "check first, then branch" toggle shape as toggleLike —
+  // follows are a binary per-user relationship, same as likes.
+  const { data: existing } = await supabase
+    .from("follows")
+    .select("*")
+    .eq("follower_id", followerId)
+    .eq("followed_id", followedId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from("follows")
+      .delete()
+      .eq("follower_id", followerId)
+      .eq("followed_id", followedId);
+  } else {
+    await supabase
+      .from("follows")
+      .insert({ follower_id: followerId, followed_id: followedId });
+
+    // Fires every time, unlike the chapter-publish notification — a follow
+    // can't happen twice in a row for the same pair without an unfollow in
+    // between, so there's no repeat-blast risk here to throttle against.
+    await supabase.from("notifications").insert({
+      user_id: followedId,
+      actor_id: followerId,
+      type: "new_follower",
+    });
+  }
+
+  revalidatePath(`/${locale}/u/${username}`);
+}

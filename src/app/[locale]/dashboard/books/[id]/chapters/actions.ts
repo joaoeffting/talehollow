@@ -18,7 +18,12 @@ export async function toggleChapterPublished(
     .eq("id", chapterId);
 
   if (nowPublishing) {
+    // record_chapter_publish handles the 24h feed-push throttle;
+    // notify_followers_for_book handles the separate, same-calendar-day
+    // notification throttle. Gated independently on purpose — a push and a
+    // notification blast don't have to happen on the same cadence.
     await supabase.rpc("record_chapter_publish", { p_book_id: bookId });
+    await supabase.rpc("notify_followers_for_book", { p_book_id: bookId });
   }
 
   revalidatePath(`/${locale}/dashboard/books/${bookId}`);
