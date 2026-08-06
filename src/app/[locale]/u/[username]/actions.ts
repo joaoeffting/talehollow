@@ -66,3 +66,35 @@ export async function updateProfile(
 
   revalidatePath(`/${locale}/u/${username}`);
 }
+
+export async function postScrapbookEntry(
+  profileId: string,
+  username: string,
+  locale: string,
+  formData: FormData,
+) {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims) return;
+
+  await supabase.from("scrapbook_entries").insert({
+    profile_id: profileId, // whose wall this post lands on
+    author_id: data.claims.sub, // who's actually posting it
+    content: formData.get("content") as string,
+  });
+
+  revalidatePath(`/${locale}/u/${username}`);
+}
+
+export async function deleteScrapbookEntry(
+  entryId: string,
+  username: string,
+  locale: string,
+) {
+  const supabase = await createClient();
+  // No ownership check written here in app code — the RLS delete policy
+  // is what actually decides whether this succeeds, for either of the
+  // two allowed roles (poster or wall owner).
+  await supabase.from("scrapbook_entries").delete().eq("id", entryId);
+  revalidatePath(`/${locale}/u/${username}`);
+}
