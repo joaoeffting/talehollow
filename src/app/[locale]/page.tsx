@@ -1,4 +1,4 @@
-import { BookCoverThumbnail } from "@/components/book-cover-thumbnail";
+import { BookListItem } from "@/components/book-list-item";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 
@@ -23,7 +23,9 @@ export default async function HomePage({
 
   const { data: books } = await supabase
     .from("books")
-    .select("id, title, genre, cover_image_url, profiles(display_name)")
+    .select(
+      "id, title, genre, cover_image_url, profiles(username, display_name)",
+    )
     .eq("is_published", true)
     .eq("language", contentLanguage)
 
@@ -40,23 +42,23 @@ export default async function HomePage({
       </div>
       <ul className="divide-y rounded border">
         {books?.map((book) => (
-          <li key={book.id} className="flex gap-4 p-4">
-            <BookCoverThumbnail
-              coverImageUrl={book.cover_image_url}
-              title={book.title}
-            />
-            <div>
-              <Link
-                href={`/books/${book.id}`}
-                className="font-medium text-primary underline underline-offset-4 hover:text-accent"
-              >
-                {book.title}
-              </Link>
-              <p className="text-sm text-muted-foreground">
-                {book.genre} · by {book.profiles.display_name}
-              </p>
-            </div>
-          </li>
+          <BookListItem
+            key={book.id}
+            href={`/books/${book.id}`}
+            coverImageUrl={book.cover_image_url}
+            title={book.title}
+            meta={
+              <>
+                {book.genre} · by{" "}
+                <Link
+                  href={`/u/${book.profiles.username}`}
+                  className="text-primary underline underline-offset-4 hover:text-accent"
+                >
+                  {book.profiles.display_name}
+                </Link>
+              </>
+            }
+          />
         ))}
         {books?.length === 0 && (
           <li className="p-4 text-sm text-muted-foreground">

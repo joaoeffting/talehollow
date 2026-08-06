@@ -70,7 +70,14 @@ export default async function PublicBookPage({
           />
         )}
         <p className="text-muted-foreground">
-          by {book.profiles.display_name} · {book.genre}
+          by{" "}
+          <Link
+            href={`/u/${book.profiles.username}`}
+            className="text-primary underline underline-offset-4 hover:text-accent"
+          >
+            {book.profiles.display_name}
+          </Link>{" "}
+          · {book.genre}
         </p>
         <p className="mt-4">{book.synopsis}</p>
       </div>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { BookListItem } from "@/components/book-list-item";
 
 export default async function DashboardPage({
   params,
@@ -35,21 +36,21 @@ export default async function DashboardPage({
       </div>
       <ul className="divide-y rounded border">
         {books?.map((book) => (
-          <li key={book.id} className="flex items-center justify-between p-4">
-            <div>
-              <p className="font-medium">{book.title}</p>
-              <p className="text-sm text-muted-foreground">
-                {book.genre} · {book.language.toUpperCase()} ·{" "}
-                {book.is_published ? "Published" : "Draft"}
-              </p>
-            </div>
-            <Link
-              href={`/dashboard/books/${book.id}`}
-              className="text-sm underline"
-            >
-              Edit
-            </Link>
-          </li>
+          <BookListItem
+            key={book.id}
+            href={`/dashboard/books/${book.id}`}
+            coverImageUrl={book.cover_image_url}
+            title={book.title}
+            meta={`${book.genre} · ${book.language.toUpperCase()} · ${book.is_published ? "Published" : "Draft"}`}
+            trailing={
+              <Link
+                href={`/dashboard/books/${book.id}`}
+                className="text-sm underline"
+              >
+                Edit
+              </Link>
+            }
+          />
         ))}
         {books?.length === 0 && (
           <li className="p-4 text-sm text-muted-foreground">No books yet.</li>

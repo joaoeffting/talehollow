@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { logout } from "../login/actions";
 
@@ -32,6 +33,12 @@ export default async function AccountPage({
         Welcome, {profile?.display_name}
       </h1>
       <p className="text-muted-foreground">{data.claims.email}</p>
+      <Link
+        href={`/u/${profile?.username}`}
+        className="text-sm text-primary underline underline-offset-4 hover:text-accent"
+      >
+        View public profile
+      </Link>
       <form action={logout.bind(null, locale)}>
         <button className="rounded border px-4 py-2">Log out</button>
       </form>
