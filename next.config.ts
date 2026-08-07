@@ -2,6 +2,18 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        // Matches any Supabase project host, not just this one — avoids a
+        // hardcoded project ref that'd silently stop matching after a
+        // project migration (e.g. moving to a prod project at launch).
+        hostname: "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
   // Strips the "-my-book-title" SEO slug that book/chapter links now carry
   // (see src/lib/slug.ts) before the request ever reaches the [id]/
   // [chapterId] dynamic routes — so page code and revalidatePath calls keep

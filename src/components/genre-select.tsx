@@ -16,6 +16,10 @@ export const GENRES = [
   { value: "non-fiction", label: "Non-Fiction" },
 ];
 
+export function genreLabelFor(genre: string) {
+  return GENRES.find((g) => g.value === genre)?.label ?? genre;
+}
+
 export function GenreSelect({
   defaultValue,
   required,

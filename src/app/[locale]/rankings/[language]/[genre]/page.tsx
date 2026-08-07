@@ -1,8 +1,23 @@
+import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { BookListItem } from "@/components/book-list-item";
-import { GENRES } from "@/components/genre-select";
+import { genreLabelFor } from "@/components/genre-select";
 import { withSlug } from "@/lib/slug";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; language: string; genre: string }>;
+}): Promise<Metadata> {
+  const { locale, language, genre } = await params;
+  const genreLabel = genreLabelFor(genre);
+  return {
+    title: `${genreLabel} rankings (${language.toUpperCase()}) — Storyloom`,
+    description: `Top-ranked ${genreLabel} stories in ${language.toUpperCase()} on Storyloom, ranked by unique views, likes, and commenters.`,
+    alternates: { canonical: `/${locale}/rankings/${language}/${genre}` },
+  };
+}
 
 export default async function GenreRankingPage({
   params,
@@ -19,7 +34,22 @@ export default async function GenreRankingPage({
     .eq("genre", genre)
     .order("score", { ascending: false });
 
-  const genreLabel = GENRES.find((g) => g.value === genre)?.label ?? genre;
+  const genreLabel = genreLabelFor(genre);
+
+  // score is the ranking formula's internal output, not something readers
+  // need next to every entry — kept admin-only, same is_admin check
+  // nav-auth-links.tsx uses for the Admin menu. unique_views/likes/commenters
+  // are shown to everyone via the stats icons below, same as any other list.
+  const { data: claims } = await supabase.auth.getClaims();
+  let isAdmin = false;
+  if (claims?.claims) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", claims.claims.sub)
+      .single();
+    isAdmin = profile?.is_admin ?? false;
+  }
 
   return (
     <div className="space-y-6 py-12">
@@ -49,11 +79,17 @@ export default async function GenreRankingPage({
                 </Link>
               </>
             }
+            stats={{
+              views: book.unique_views ?? 0,
+              likes: book.unique_likes ?? 0,
+              comments: book.unique_commenters ?? 0,
+            }}
             trailing={
-              <p className="shrink-0 text-sm text-muted-foreground">
-                {book.unique_views}v · {book.unique_likes}l ·{" "}
-                {book.unique_commenters}c · score {book.score}
-              </p>
+              isAdmin ? (
+                <p className="shrink-0 text-xs text-muted-foreground">
+                  score {book.score}
+                </p>
+              ) : undefined
             }
           />
         ))}

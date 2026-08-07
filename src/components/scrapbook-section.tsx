@@ -1,6 +1,7 @@
 "use client";
 
 import { useOptimistic, useRef } from "react";
+import { useFormatter } from "next-intl";
 import { Trash2 } from "lucide-react";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { ReportButton } from "@/components/report-button";
@@ -11,6 +12,7 @@ type ScrapbookEntry = {
   id: string;
   content: string;
   author_id: string;
+  created_at: string;
   profiles: { username: string; display_name: string };
 };
 
@@ -28,6 +30,7 @@ export function ScrapbookSection({
   entries: ScrapbookEntry[];
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const format = useFormatter();
 
   // Same optimistic-append pattern as CommentSection: show the note the
   // instant the form submits, and let the real row (with its real id) take
@@ -40,6 +43,7 @@ export function ScrapbookSection({
         id: `optimistic-${Date.now()}`,
         content,
         author_id: currentUserId ?? "",
+        created_at: new Date().toISOString(),
         profiles: { username: "", display_name: "You" },
       },
       ...state,
@@ -79,8 +83,14 @@ export function ScrapbookSection({
           const isOptimistic = entry.id.startsWith("optimistic-");
           return (
             <li key={entry.id} className="rounded border p-3">
-              <p className="text-sm font-medium">
+              <p className="flex items-baseline gap-2 text-sm font-medium">
                 {entry.profiles.display_name}
+                <span className="text-xs font-normal text-muted-foreground">
+                  {format.dateTime(new Date(entry.created_at), {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </span>
               </p>
               <p>{entry.content}</p>
               <div className="mt-1 flex items-center gap-3">

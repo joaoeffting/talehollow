@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { createClient } from "@/utils/supabase/server";
 import { Link } from "@/i18n/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,6 +9,8 @@ import { FollowButton } from "@/components/follow-button";
 import { ScrapbookSection } from "@/components/scrapbook-section";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { withSlug } from "@/lib/slug";
+import { getBookRankingsLookup } from "@/lib/book-rankings";
+import { genreLabelFor } from "@/components/genre-select";
 import { updateProfile } from "./actions";
 
 // Same avatar-plus-name row used for both the Followers and Following
@@ -40,6 +43,34 @@ function ProfileListItem({
 }
 
 const TAB_VALUES = ["books", "scrapbook", "followers", "following"] as const;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; username: string }>;
+}): Promise<Metadata> {
+  const { locale, username } = await params;
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name, bio, avatar_url")
+    .eq("username", username)
+    .single();
+
+  if (!profile) return {};
+
+  const title = `${profile.display_name ?? username} (@${username}) — Storyloom`;
+  return {
+    title,
+    description: profile.bio ?? undefined,
+    alternates: { canonical: `/${locale}/u/${username}` },
+    openGraph: {
+      title,
+      description: profile.bio ?? undefined,
+      images: profile.avatar_url ? [profile.avatar_url] : undefined,
+    },
+  };
+}
 
 export default async function ProfilePage({
   params,
@@ -78,11 +109,12 @@ export default async function ProfilePage({
     .eq("author_id", profile.id)
     .eq("is_published", true)
     .order("last_pushed_at", { ascending: false });
+  const rankings = await getBookRankingsLookup(supabase);
 
   const { data: entries } = await supabase
     .from("scrapbook_entries")
     .select(
-      "id, content, author_id, profiles!scrapbook_entries_author_id_fkey(username, display_name)",
+      "id, content, author_id, created_at, profiles!scrapbook_entries_author_id_fkey(username, display_name)",
     )
     .eq("profile_id", profile.id)
     .order("created_at", { ascending: false });
@@ -143,15 +175,32 @@ export default async function ProfilePage({
 
         <TabsContent value="books">
           <ul className="divide-y rounded border">
-            {books?.map((book) => (
-              <BookListItem
-                key={book.id}
-                href={`/books/${withSlug(book.id, book.title)}`}
-                coverImageUrl={book.cover_image_url}
-                title={book.title}
-                meta={book.genre}
-              />
-            ))}
+            {books?.map((book) => {
+              const ranking = rankings.get(book.id);
+              return (
+                <BookListItem
+                  key={book.id}
+                  href={`/books/${withSlug(book.id, book.title)}`}
+                  coverImageUrl={book.cover_image_url}
+                  title={book.title}
+                  meta={book.genre}
+                  rankBadge={
+                    ranking
+                      ? { rank: ranking.rank, genreLabel: genreLabelFor(book.genre) }
+                      : undefined
+                  }
+                  stats={
+                    ranking
+                      ? {
+                          views: ranking.uniqueViews,
+                          likes: ranking.uniqueLikes,
+                          comments: ranking.uniqueCommenters,
+                        }
+                      : undefined
+                  }
+                />
+              );
+            })}
             {books?.length === 0 && (
               <li className="p-4 text-sm text-muted-foreground">
                 No published books yet.

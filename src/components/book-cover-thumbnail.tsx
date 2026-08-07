@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { BookOpen } from "lucide-react";
 
 export function BookCoverThumbnail({
@@ -9,12 +10,14 @@ export function BookCoverThumbnail({
 }) {
   if (coverImageUrl) {
     return (
-      // Plain <img>, matching Phase 4's CoverInput — same reasoning: a
-      // next/image remote-pattern entry for the Supabase Storage domain
-      // isn't worth configuring for a v1 thumbnail.
-      <img
+      // width/height match the rendered size (w-16/h-24 = 64x96px) — next/image
+      // needs these to compute lazy-loading/srcset even though the CSS classes
+      // are what actually control the displayed box.
+      <Image
         src={coverImageUrl}
         alt={`Cover for ${title}`}
+        width={64}
+        height={96}
         className="h-24 w-16 shrink-0 rounded border object-cover"
       />
     );

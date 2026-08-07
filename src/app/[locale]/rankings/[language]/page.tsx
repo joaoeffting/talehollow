@@ -1,5 +1,19 @@
+import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { GENRES } from "@/components/genre-select";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; language: string }>;
+}): Promise<Metadata> {
+  const { locale, language } = await params;
+  return {
+    title: `Rankings (${language.toUpperCase()}) — Storyloom`,
+    description: `Browse top-ranked ${language.toUpperCase()} stories by genre on Storyloom.`,
+    alternates: { canonical: `/${locale}/rankings/${language}` },
+  };
+}
 
 export default async function RankingsIndexPage({
   params,

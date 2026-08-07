@@ -1,9 +1,44 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { Eye, ThumbsUp, MessageCircle } from "lucide-react";
 import { ReportButton } from "@/components/report-button";
 import { withSlug } from "@/lib/slug";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { locale, id } = await params;
+  const supabase = await createClient();
+  const { data: book } = await supabase
+    .from("books")
+    .select("title, synopsis, cover_image_url")
+    .eq("id", id)
+    .eq("is_published", true)
+    .single();
+
+  if (!book) return {}; // let the page's own notFound() handle the 404 case
+
+  return {
+    title: `${book.title} — Storyloom`,
+    description: book.synopsis ?? undefined,
+    alternates: {
+      // The slug-rewrite in next.config.ts means this book is also reachable
+      // at the bare-id URL — canonical points search engines at the pretty,
+      // slugged one that every internal link (withSlug) actually uses.
+      canonical: `/${locale}/books/${withSlug(id, book.title)}`,
+    },
+    openGraph: {
+      title: book.title,
+      description: book.synopsis ?? undefined,
+      images: book.cover_image_url ? [book.cover_image_url] : undefined,
+    },
+  };
+}
 
 export default async function PublicBookPage({
   params,
@@ -63,14 +98,37 @@ export default async function PublicBookPage({
 
   return (
     <div className="space-y-6 py-12">
+      <script
+        type="application/ld+json"
+        // Structured data search engines can parse to understand this page is
+        // specifically a "Book" (with an author, genre, etc.), not just a
+        // blob of text — can surface richer results than a plain title/description.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Book",
+            name: book.title,
+            author: { "@type": "Person", name: book.profiles.display_name },
+            genre: book.genre,
+            inLanguage: book.language,
+            description: book.synopsis,
+          }),
+        }}
+      />
       <div>
         <h1 className="text-3xl font-bold">{book.title}</h1>
         {book.cover_image_url && (
-          <img
-            src={book.cover_image_url}
-            alt={book.title}
-            className="w-full max-w-xs rounded"
-          />
+          // Fixed 2:3 aspect ratio, matching the convention already used by
+          // BookCoverThumbnail and CoverInput's preview elsewhere in the app.
+          <div className="relative aspect-2/3 w-full max-w-xs">
+            <Image
+              src={book.cover_image_url}
+              alt={book.title}
+              fill
+              className="rounded object-cover"
+              sizes="(max-width: 640px) 100vw, 320px"
+            />
+          </div>
         )}
         <p className="text-muted-foreground">
           by{" "}

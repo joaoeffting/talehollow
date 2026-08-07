@@ -6,9 +6,14 @@ import { Link } from "@/i18n/navigation";
 import { Providers } from "../providers";
 import { PostHogPageview } from "@/components/posthog-pageview";
 import { NavAuthLinks } from "@/components/nav-auth-links";
+import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
 export const metadata: Metadata = {
+  // Lets every per-page metadata export below use relative image/canonical
+  // URLs (e.g. openGraph.images: ["/covers/x.jpg"]) and have them resolve to
+  // absolute ones in the actual rendered <meta>/<link> tags.
+  metadataBase: new URL(SITE_URL),
   title: "Storyloom",
   description: "A community platform for serialized fiction.",
 };
