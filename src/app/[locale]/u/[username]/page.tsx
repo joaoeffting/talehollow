@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BookListItem } from "@/components/book-list-item";
 import { EditableProfileHeader } from "@/components/editable-profile-header";
 import { FollowButton } from "@/components/follow-button";
+import { FollowListDialog } from "@/components/follow-list-dialog";
 import { ScrapbookSection } from "@/components/scrapbook-section";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { withSlug } from "@/lib/slug";
@@ -42,7 +43,7 @@ function ProfileListItem({
   );
 }
 
-const TAB_VALUES = ["books", "scrapbook", "followers", "following"] as const;
+const TAB_VALUES = ["books", "scrapbook"] as const;
 
 export async function generateMetadata({
   params,
@@ -161,16 +162,58 @@ export default async function ProfilePage({
         )}
       </div>
 
+      {/* X-style stat row, not tabs — the counts themselves are the useful
+          at-a-glance info; the actual lists are secondary, so they live
+          behind a dialog rather than taking up two full tab slots. */}
+      <div className="flex gap-4 text-sm">
+        <FollowListDialog
+          count={following?.length ?? 0}
+          label="Following"
+          title={`${profile.display_name ?? username}'s following`}
+        >
+          <ul className="divide-y">
+            {following?.map((f) => (
+              <ProfileListItem
+                key={f.profiles.username}
+                username={f.profiles.username}
+                displayName={f.profiles.display_name}
+                avatarUrl={f.profiles.avatar_url}
+              />
+            ))}
+            {following?.length === 0 && (
+              <li className="p-4 text-sm text-muted-foreground">
+                Not following anyone yet.
+              </li>
+            )}
+          </ul>
+        </FollowListDialog>
+        <FollowListDialog
+          count={followers?.length ?? 0}
+          label={followers?.length === 1 ? "Follower" : "Followers"}
+          title={`${profile.display_name ?? username}'s followers`}
+        >
+          <ul className="divide-y">
+            {followers?.map((f) => (
+              <ProfileListItem
+                key={f.profiles.username}
+                username={f.profiles.username}
+                displayName={f.profiles.display_name}
+                avatarUrl={f.profiles.avatar_url}
+              />
+            ))}
+            {followers?.length === 0 && (
+              <li className="p-4 text-sm text-muted-foreground">
+                No followers yet.
+              </li>
+            )}
+          </ul>
+        </FollowListDialog>
+      </div>
+
       <Tabs defaultValue={initialTab}>
         <TabsList>
           <TabsTrigger value="books">Books</TabsTrigger>
           <TabsTrigger value="scrapbook">Scrapbook</TabsTrigger>
-          <TabsTrigger value="followers">
-            Followers ({followers?.length ?? 0})
-          </TabsTrigger>
-          <TabsTrigger value="following">
-            Following ({following?.length ?? 0})
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="books">
@@ -217,42 +260,6 @@ export default async function ProfilePage({
             currentUserId={claims?.claims?.sub ?? null}
             entries={entries ?? []}
           />
-        </TabsContent>
-
-        <TabsContent value="followers">
-          <ul className="divide-y rounded border">
-            {followers?.map((f) => (
-              <ProfileListItem
-                key={f.profiles.username}
-                username={f.profiles.username}
-                displayName={f.profiles.display_name}
-                avatarUrl={f.profiles.avatar_url}
-              />
-            ))}
-            {followers?.length === 0 && (
-              <li className="p-4 text-sm text-muted-foreground">
-                No followers yet.
-              </li>
-            )}
-          </ul>
-        </TabsContent>
-
-        <TabsContent value="following">
-          <ul className="divide-y rounded border">
-            {following?.map((f) => (
-              <ProfileListItem
-                key={f.profiles.username}
-                username={f.profiles.username}
-                displayName={f.profiles.display_name}
-                avatarUrl={f.profiles.avatar_url}
-              />
-            ))}
-            {following?.length === 0 && (
-              <li className="p-4 text-sm text-muted-foreground">
-                Not following anyone yet.
-              </li>
-            )}
-          </ul>
         </TabsContent>
       </Tabs>
     </div>

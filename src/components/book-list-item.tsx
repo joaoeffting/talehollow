@@ -19,8 +19,10 @@ function formatCount(n: number): string {
 export function BookListItem({
   href,
   coverImageUrl,
+  coverSize = "sm",
   title,
   meta,
+  synopsis,
   leading,
   trailing,
   stats,
@@ -28,8 +30,14 @@ export function BookListItem({
 }: {
   href: string;
   coverImageUrl: string | null;
+  // "lg" for feature-style lists (rankings) where the cover carries more of
+  // the row's visual weight; "sm" (default) for denser lists.
+  coverSize?: "sm" | "lg";
   title: string;
   meta?: ReactNode;
+  // A short excerpt (already truncated by the caller) shown under meta/stats
+  // — only worth the vertical space on lists using the larger cover.
+  synopsis?: string;
   leading?: ReactNode;
   trailing?: ReactNode;
   // Views/likes/comments — shown wherever this is passed, not just on the
@@ -41,10 +49,16 @@ export function BookListItem({
   rankBadge?: { rank: number; genreLabel: string };
 }) {
   return (
-    <li className="flex items-center gap-4 p-4">
+    <li
+      className={`flex gap-4 p-4 ${coverSize === "lg" ? "items-start" : "items-center"}`}
+    >
       {leading}
-      <BookCoverThumbnail coverImageUrl={coverImageUrl} title={title} />
-      <div className="flex flex-1 items-center justify-between gap-4">
+      <BookCoverThumbnail
+        coverImageUrl={coverImageUrl}
+        title={title}
+        size={coverSize}
+      />
+      <div className="flex flex-1 items-start justify-between gap-4">
         <div>
           <Link
             href={href}
@@ -77,6 +91,11 @@ export function BookListItem({
             </div>
           )}
           {meta && <p className="text-sm text-muted-foreground">{meta}</p>}
+          {synopsis && (
+            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+              {synopsis}
+            </p>
+          )}
         </div>
         {trailing}
       </div>

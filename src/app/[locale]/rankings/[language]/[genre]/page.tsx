@@ -34,6 +34,18 @@ export default async function GenreRankingPage({
     .eq("genre", genre)
     .order("score", { ascending: false });
 
+  // book_rankings doesn't carry synopsis (it's a stats-only view) — one
+  // follow-up query against the real books for just the ids on this page,
+  // rather than widening the view for a single display-only field.
+  const bookIds = (rankings ?? []).map((book) => book.id).filter((id) => id !== null);
+  const { data: synopses } = await supabase
+    .from("books")
+    .select("id, synopsis")
+    .in("id", bookIds);
+  const synopsisById = new Map(
+    (synopses ?? []).map((book) => [book.id, book.synopsis]),
+  );
+
   const genreLabel = genreLabelFor(genre);
 
   // score is the ranking formula's internal output, not something readers
@@ -62,10 +74,11 @@ export default async function GenreRankingPage({
             key={book.id}
             href={`/books/${withSlug(book.id, book.title)}`}
             coverImageUrl={book.cover_image_url}
+            coverSize="lg"
             title={book.title}
             leading={
-              <span className="w-6 shrink-0 text-muted-foreground">
-                #{i + 1}
+              <span className="w-8 shrink-0 text-2xl font-bold text-muted-foreground">
+                {i + 1}
               </span>
             }
             meta={
@@ -79,6 +92,7 @@ export default async function GenreRankingPage({
                 </Link>
               </>
             }
+            synopsis={book.id ? synopsisById.get(book.id) ?? undefined : undefined}
             stats={{
               views: book.unique_views ?? 0,
               likes: book.unique_likes ?? 0,
