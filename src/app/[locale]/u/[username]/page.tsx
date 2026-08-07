@@ -7,10 +7,12 @@ import { BookListItem } from "@/components/book-list-item";
 import { EditableProfileHeader } from "@/components/editable-profile-header";
 import { FollowButton } from "@/components/follow-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
+import { SaveButton } from "@/components/save-button";
 import { ScrapbookSection } from "@/components/scrapbook-section";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { withSlug } from "@/lib/slug";
 import { getBookRankingsLookup } from "@/lib/book-rankings";
+import { getSavedBookIds } from "@/lib/saved-books";
 import { genreLabelFor } from "@/components/genre-select";
 import { updateProfile } from "./actions";
 
@@ -43,7 +45,10 @@ function ProfileListItem({
   );
 }
 
-const TAB_VALUES = ["books", "scrapbook"] as const;
+// "saved" is only ever a valid *value* here — the tab trigger itself is
+// still owner-gated below, so a stranger passing ?tab=saved just falls
+// through with no matching trigger to select (Tabs quietly no-ops).
+const TAB_VALUES = ["books", "scrapbook", "saved"] as const;
 
 export async function generateMetadata({
   params,
@@ -82,12 +87,6 @@ export default async function ProfilePage({
 }) {
   const { locale, username } = await params;
   const { tab } = await searchParams;
-  // Lets a link jump straight to a specific tab (e.g. a reported scrapbook
-  // entry from the admin reports page) via ?tab=scrapbook — falls back to
-  // "books" for anything missing or not one of the real tab values.
-  const initialTab = TAB_VALUES.includes(tab as (typeof TAB_VALUES)[number])
-    ? (tab as (typeof TAB_VALUES)[number])
-    : "books";
   const supabase = await createClient();
 
   const { data: profile } = await supabase
@@ -100,6 +99,15 @@ export default async function ProfilePage({
 
   const { data: claims } = await supabase.auth.getClaims();
   const isOwner = claims?.claims?.sub === profile.id;
+
+  // Lets a link jump straight to a specific tab (e.g. a reported scrapbook
+  // entry from the admin reports page) via ?tab=scrapbook — falls back to
+  // "books" for anything missing, not a real tab value, or ("saved") not
+  // available to this particular viewer.
+  const requestedTab = TAB_VALUES.includes(tab as (typeof TAB_VALUES)[number])
+    ? (tab as (typeof TAB_VALUES)[number])
+    : "books";
+  const initialTab = requestedTab === "saved" && !isOwner ? "books" : requestedTab;
   const updateWithUsername = updateProfile.bind(null, username, locale);
 
   // Only that author's published books — a visitor should never see a
@@ -111,6 +119,18 @@ export default async function ProfilePage({
     .eq("is_published", true)
     .order("last_pushed_at", { ascending: false });
   const rankings = await getBookRankingsLookup(supabase);
+  const savedBookIds = await getSavedBookIds(supabase, claims?.claims?.sub ?? null);
+
+  // Only fetched for the owner's own view — RLS would return nothing for
+  // anyone else anyway (saved_books select policy is auth.uid() = user_id),
+  // but there's no point issuing the query at all for a visitor.
+  const { data: savedBooks } = isOwner
+    ? await supabase
+        .from("saved_books")
+        .select("book_id, books!inner(id, title, genre, cover_image_url, is_published)")
+        .eq("user_id", profile.id)
+        .eq("books.is_published", true)
+    : { data: null };
 
   const { data: entries } = await supabase
     .from("scrapbook_entries")
@@ -214,6 +234,7 @@ export default async function ProfilePage({
         <TabsList>
           <TabsTrigger value="books">Books</TabsTrigger>
           <TabsTrigger value="scrapbook">Scrapbook</TabsTrigger>
+          {isOwner && <TabsTrigger value="saved">Saved</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="books">
@@ -241,6 +262,15 @@ export default async function ProfilePage({
                         }
                       : undefined
                   }
+                  saveButton={
+                    claims?.claims ? (
+                      <SaveButton
+                        bookId={book.id}
+                        initialIsSaved={savedBookIds.has(book.id)}
+                        variant="icon"
+                      />
+                    ) : undefined
+                  }
                 />
               );
             })}
@@ -261,6 +291,47 @@ export default async function ProfilePage({
             entries={entries ?? []}
           />
         </TabsContent>
+
+        {isOwner && (
+          <TabsContent value="saved">
+            <ul className="divide-y rounded border">
+              {savedBooks?.map(({ books: book }) => {
+                const ranking = rankings.get(book.id);
+                return (
+                  <BookListItem
+                    key={book.id}
+                    href={`/books/${withSlug(book.id, book.title)}`}
+                    coverImageUrl={book.cover_image_url}
+                    title={book.title}
+                    meta={book.genre}
+                    rankBadge={
+                      ranking
+                        ? { rank: ranking.rank, genreLabel: genreLabelFor(book.genre) }
+                        : undefined
+                    }
+                    stats={
+                      ranking
+                        ? {
+                            views: ranking.uniqueViews,
+                            likes: ranking.uniqueLikes,
+                            comments: ranking.uniqueCommenters,
+                          }
+                        : undefined
+                    }
+                    saveButton={
+                      <SaveButton bookId={book.id} initialIsSaved variant="icon" />
+                    }
+                  />
+                );
+              })}
+              {savedBooks?.length === 0 && (
+                <li className="p-4 text-sm text-muted-foreground">
+                  No saved books yet.
+                </li>
+              )}
+            </ul>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

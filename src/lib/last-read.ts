@@ -1,0 +1,92 @@
+// Reading progress lives entirely in the browser — no DB table, no
+// cross-device sync. Denormalizing title/cover/position into the stored
+// entry (not just ids) means every consumer (the homepage's Continue
+// Reading row, the book page's chapter list) can render immediately from
+// localStorage alone, with no follow-up fetch needed.
+const STORAGE_PREFIX = "storyloom:last-read:";
+
+export type LastRead = {
+  bookId: string;
+  bookTitle: string;
+  bookCoverUrl: string | null;
+  chapterId: string;
+  chapterTitle: string;
+  position: number;
+  updatedAt: string;
+};
+
+export function setLastRead(entry: LastRead) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_PREFIX + entry.bookId, JSON.stringify(entry));
+  } catch {
+    // localStorage can throw (private browsing, quota) — reading progress
+    // is a nice-to-have, not worth crashing the page over.
+  }
+}
+
+// localStorage only fires a native "storage" event in *other* tabs, never
+// the one that made the change — but that's fine here, since the only
+// writer (LastReadTracker) lives on the chapter page, a different mounted
+// component than either reader below, so a fresh mount already gets a
+// fresh snapshot. This subscription just keeps multi-tab reading in sync.
+export function subscribeToLastRead(callback: () => void) {
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+}
+
+// useSyncExternalStore requires getSnapshot to return a referentially
+// stable value when nothing has changed, or it re-renders (or loops)
+// forever — these two caches compare the raw localStorage string(s) against
+// last time and only re-parse (and hand back a new object/array) when the
+// underlying data actually changed.
+const lastReadCache = new Map<string, { raw: string | null; parsed: LastRead | null }>();
+
+export function getLastReadSnapshot(bookId: string): LastRead | null {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(STORAGE_PREFIX + bookId);
+  const cached = lastReadCache.get(bookId);
+  if (cached && cached.raw === raw) return cached.parsed;
+
+  let parsed: LastRead | null = null;
+  try {
+    parsed = raw ? (JSON.parse(raw) as LastRead) : null;
+  } catch {
+    parsed = null;
+  }
+  lastReadCache.set(bookId, { raw, parsed });
+  return parsed;
+}
+
+let allLastReadCache: { signature: string; parsed: LastRead[] } | null = null;
+
+export function getAllLastReadSnapshot(): LastRead[] {
+  if (typeof window === "undefined") return [];
+
+  const keys: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith(STORAGE_PREFIX)) keys.push(key);
+  }
+  keys.sort();
+  const signature = keys.map((key) => `${key}=${localStorage.getItem(key)}`).join("|");
+
+  if (allLastReadCache && allLastReadCache.signature === signature) {
+    return allLastReadCache.parsed;
+  }
+
+  const entries: LastRead[] = [];
+  for (const key of keys) {
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+    try {
+      entries.push(JSON.parse(raw) as LastRead);
+    } catch {
+      continue; // skip a corrupted single entry rather than failing the whole scan
+    }
+  }
+  entries.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+
+  allLastReadCache = { signature, parsed: entries };
+  return entries;
+}

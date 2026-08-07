@@ -38,6 +38,40 @@ export async function toggleLike(
   revalidatePath(`/${locale}/books/${bookId}`); // the book page's aggregate total needs to update too
 }
 
+export async function toggleSave(bookId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims) return; // silently no-op for logged-out visitors — no save button should even render for them
+
+  const userId = data.claims.sub;
+
+  const { data: existing } = await supabase
+    .from("saved_books")
+    .select("book_id")
+    .eq("book_id", bookId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from("saved_books")
+      .delete()
+      .eq("book_id", bookId)
+      .eq("user_id", userId);
+  } else {
+    await supabase.from("saved_books").insert({ book_id: bookId, user_id: userId });
+  }
+
+  // Save buttons show up on every book list in the app (feed, rankings,
+  // profile, the book page itself), not just one or two known routes like
+  // toggleLike's — revalidating the whole [locale] layout catches all of
+  // them without hardcoding every surface here. Dynamic-segment paths need
+  // the literal file-structure pattern, not the resolved locale value —
+  // revalidatePath('/en', 'layout') would only match a route literally
+  // named "en", not the [locale] segment itself.
+  revalidatePath("/[locale]", "layout");
+}
+
 // Shared by toggleLike and postComment — both notify the book's author about
 // an interaction on their work, and both need to skip notifying an author
 // about their own like/comment on their own chapter.

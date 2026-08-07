@@ -27,6 +27,7 @@ export function BookListItem({
   trailing,
   stats,
   rankBadge,
+  saveButton,
 }: {
   href: string;
   coverImageUrl: string | null;
@@ -47,6 +48,10 @@ export function BookListItem({
   // "#12 in Horror" — omit this on the rankings page itself, where the
   // `leading` slot already shows the same rank as a large index number.
   rankBadge?: { rank: number; genreLabel: string };
+  // A <SaveButton variant="icon" .../> — a separate slot from `trailing`
+  // since it shows up on nearly every list (unlike trailing, which is
+  // per-page bespoke content) and needs to sit above it, not replace it.
+  saveButton?: ReactNode;
 }) {
   return (
     <li
@@ -97,7 +102,12 @@ export function BookListItem({
             </p>
           )}
         </div>
-        {trailing}
+        {(saveButton || trailing) && (
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            {saveButton}
+            {trailing}
+          </div>
+        )}
       </div>
     </li>
   );

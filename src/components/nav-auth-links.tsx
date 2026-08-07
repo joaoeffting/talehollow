@@ -46,7 +46,12 @@ export async function NavAuthLinks({ locale }: { locale: string }) {
         userId={data.claims.sub}
         initialUnreadCount={unreadCount ?? 0}
       />
-      <Link href="/account" aria-label="Your account">
+      <Link
+        // Falls back to /account only if the profile row itself failed to
+        // load — there's no username to link to in that case.
+        href={profile?.username ? `/u/${profile.username}` : "/account"}
+        aria-label="Your profile"
+      >
         <Avatar className="h-8 w-8">
           <AvatarImage
             src={profile?.avatar_url ?? undefined}

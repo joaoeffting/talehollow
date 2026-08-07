@@ -5,6 +5,8 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { Eye, ThumbsUp, MessageCircle } from "lucide-react";
 import { ReportButton } from "@/components/report-button";
+import { SaveButton } from "@/components/save-button";
+import { ChapterListWithProgress } from "@/components/chapter-list-with-progress";
 import { withSlug } from "@/lib/slug";
 
 export async function generateMetadata({
@@ -55,7 +57,10 @@ export default async function PublicBookPage({
   // "public" URL and seeing it rendered as if it were live.
   const { data: book } = await supabase
     .from("books")
-    .select("*, profiles(username, display_name)") // join across the author_id -> profiles relationship
+    // Explicit FK name, not just "profiles(...)" — the new saved_books
+    // table also links books to profiles, so an unqualified embed is
+    // ambiguous now (PGRST201) between "the author" and "who saved this."
+    .select("*, profiles!books_author_id_fkey(username, display_name)")
     .eq("id", id)
     .eq("is_published", true)
     .single();
@@ -95,6 +100,17 @@ export default async function PublicBookPage({
     .from("comments")
     .select("*", { count: "exact", head: true })
     .eq("book_id", id);
+
+  let isSaved = false;
+  if (claims?.claims) {
+    const { data: existingSave } = await supabase
+      .from("saved_books")
+      .select("book_id")
+      .eq("book_id", id)
+      .eq("user_id", claims.claims.sub)
+      .maybeSingle();
+    isSaved = !!existingSave;
+  }
 
   return (
     <div className="space-y-6 py-12">
@@ -157,29 +173,17 @@ export default async function PublicBookPage({
           {commentCount ?? 0} {commentCount === 1 ? "comment" : "comments"}
         </span>
         {claims?.claims && (
-          <ReportButton targetType="book" targetId={book.id} locale={locale} />
+          <>
+            <SaveButton bookId={book.id} initialIsSaved={isSaved} />
+            <ReportButton targetType="book" targetId={book.id} locale={locale} />
+          </>
         )}
       </div>
-      <div>
-        <h2 className="mb-2 text-xl font-semibold">Chapters</h2>
-        <ul className="divide-y rounded border">
-          {chapters?.map((chapter) => (
-            <li key={chapter.id} className="p-3">
-              <Link
-                href={`/books/${withSlug(id, book.title)}/chapters/${withSlug(chapter.id, chapter.title)}`}
-                className="text-primary underline underline-offset-4 hover:text-accent"
-              >
-                {chapter.position}. {chapter.title}
-              </Link>
-            </li>
-          ))}
-          {chapters?.length === 0 && (
-            <li className="p-3 text-sm text-muted-foreground">
-              No chapters published yet.
-            </li>
-          )}
-        </ul>
-      </div>
+      <ChapterListWithProgress
+        bookId={id}
+        bookTitle={book.title}
+        chapters={chapters ?? []}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { ViewTracker } from "./view-tracker";
+import { LastReadTracker } from "./last-read-tracker";
 import { LikeButton } from "./like-button";
 import { CommentSection } from "./comment-section";
 import { ReportButton } from "@/components/report-button";
@@ -67,7 +68,7 @@ export default async function ChapterPage({
   // the JSON-LD blocks further down don't need a second book query.
   const { data: book } = await supabase
     .from("books")
-    .select("title, genre, language")
+    .select("title, genre, language, cover_image_url")
     .eq("id", id)
     .single();
   if (!book) notFound();
@@ -161,6 +162,14 @@ export default async function ChapterPage({
         }}
       />
       {!claims?.claims && <ViewTracker chapterId={chapter.id} />}
+      <LastReadTracker
+        bookId={id}
+        bookTitle={book.title}
+        bookCoverUrl={book.cover_image_url}
+        chapterId={chapter.id}
+        chapterTitle={chapter.title}
+        position={chapter.position}
+      />
       <Link
         href={bookHref}
         className="text-md text-muted-foreground underline underline-offset-4 hover:text-accent"

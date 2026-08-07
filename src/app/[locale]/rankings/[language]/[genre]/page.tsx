@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { BookListItem } from "@/components/book-list-item";
+import { SaveButton } from "@/components/save-button";
 import { genreLabelFor } from "@/components/genre-select";
 import { withSlug } from "@/lib/slug";
+import { getSavedBookIds } from "@/lib/saved-books";
 
 export async function generateMetadata({
   params,
@@ -62,6 +64,7 @@ export default async function GenreRankingPage({
       .single();
     isAdmin = profile?.is_admin ?? false;
   }
+  const savedBookIds = await getSavedBookIds(supabase, claims?.claims?.sub ?? null);
 
   return (
     <div className="space-y-6 py-12">
@@ -103,6 +106,15 @@ export default async function GenreRankingPage({
                 <p className="shrink-0 text-xs text-muted-foreground">
                   score {book.score}
                 </p>
+              ) : undefined
+            }
+            saveButton={
+              claims?.claims && book.id ? (
+                <SaveButton
+                  bookId={book.id}
+                  initialIsSaved={savedBookIds.has(book.id)}
+                  variant="icon"
+                />
               ) : undefined
             }
           />

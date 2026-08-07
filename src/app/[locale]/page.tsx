@@ -3,7 +3,10 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { withSlug } from "@/lib/slug";
 import { getBookRankingsLookup } from "@/lib/book-rankings";
+import { getSavedBookIds } from "@/lib/saved-books";
 import { genreLabelFor } from "@/components/genre-select";
+import { SaveButton } from "@/components/save-button";
+import { ContinueReadingSection } from "@/components/continue-reading-section";
 
 const PAGE_SIZE = 20;
 
@@ -36,8 +39,10 @@ export default async function HomePage({
   const from = (page - 1) * PAGE_SIZE;
   const { data: booksPlusOne } = await supabase
     .from("books")
+    // Explicit FK name — saved_books also links books to profiles now, so
+    // an unqualified "profiles(...)" embed is ambiguous (PGRST201).
     .select(
-      "id, title, genre, cover_image_url, profiles(username, display_name)",
+      "id, title, genre, cover_image_url, profiles!books_author_id_fkey(username, display_name)",
     )
     .eq("is_published", true)
     .eq("language", contentLanguage)
@@ -47,9 +52,13 @@ export default async function HomePage({
   const hasNextPage = (booksPlusOne?.length ?? 0) > PAGE_SIZE;
   const books = booksPlusOne?.slice(0, PAGE_SIZE) ?? [];
   const rankings = await getBookRankingsLookup(supabase);
+  const savedBookIds = await getSavedBookIds(supabase, claims?.claims?.sub ?? null);
 
   return (
     <div className="space-y-6 py-12">
+      {/* Reading progress is browser-local only (src/lib/last-read.ts) — this
+          only makes sense on the un-paginated main view, not page 2+. */}
+      {page === 1 && <ContinueReadingSection />}
       <div>
         <h1 className="text-3xl font-bold">Latest Updates</h1>
         <p className="text-muted-foreground">
@@ -89,6 +98,15 @@ export default async function HomePage({
                     {book.profiles.display_name}
                   </Link>
                 </>
+              }
+              saveButton={
+                claims?.claims ? (
+                  <SaveButton
+                    bookId={book.id}
+                    initialIsSaved={savedBookIds.has(book.id)}
+                    variant="icon"
+                  />
+                ) : undefined
               }
             />
           );
