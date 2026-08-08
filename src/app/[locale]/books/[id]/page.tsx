@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { Eye, ThumbsUp, MessageCircle } from "lucide-react";
+import { Eye, ThumbsUp, MessageCircle, Pencil } from "lucide-react";
 import { ReportButton } from "@/components/report-button";
 import { SaveButton } from "@/components/save-button";
 import { ChapterListWithProgress } from "@/components/chapter-list-with-progress";
@@ -66,6 +66,8 @@ export default async function PublicBookPage({
     .single();
 
   if (!book) notFound();
+
+  const isAuthor = claims?.claims?.sub === book.author_id;
 
   const { data: chapters } = await supabase
     .from("chapters")
@@ -158,7 +160,7 @@ export default async function PublicBookPage({
         </p>
         <p className="mt-4">{book.synopsis}</p>
       </div>
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <Eye className="h-4 w-4" aria-hidden="true" />
           {/* "1 views" reads as a typo, not a feature — worth the ternary. */}
@@ -172,6 +174,15 @@ export default async function PublicBookPage({
           <MessageCircle className="h-4 w-4" aria-hidden="true" />
           {commentCount ?? 0} {commentCount === 1 ? "comment" : "comments"}
         </span>
+        {isAuthor && (
+          <Link
+            href={`/dashboard/books/${book.id}`}
+            className="flex items-center gap-1.5 text-primary underline underline-offset-4 hover:text-accent"
+          >
+            <Pencil className="h-4 w-4" aria-hidden="true" />
+            Edit
+          </Link>
+        )}
         {claims?.claims && (
           <>
             <SaveButton bookId={book.id} initialIsSaved={isSaved} />

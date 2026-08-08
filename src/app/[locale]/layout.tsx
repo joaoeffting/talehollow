@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Search } from "lucide-react";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
@@ -59,6 +60,13 @@ export default async function RootLayout({
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     Rankings
+                  </Link>
+                  <Link
+                    href="/search"
+                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    <Search className="h-4 w-4" aria-hidden="true" />
+                    Search
                   </Link>
                 </div>
                 <NavAuthLinks locale={locale} />

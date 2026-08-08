@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { Pencil } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { Link } from "@/i18n/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -269,6 +270,17 @@ export default async function ProfilePage({
                         initialIsSaved={savedBookIds.has(book.id)}
                         variant="icon"
                       />
+                    ) : undefined
+                  }
+                  trailing={
+                    isOwner ? (
+                      <Link
+                        href={`/dashboard/books/${book.id}`}
+                        className="flex items-center gap-1 text-xs text-primary underline underline-offset-4 hover:text-accent"
+                      >
+                        <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                        Edit
+                      </Link>
                     ) : undefined
                   }
                 />

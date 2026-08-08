@@ -23,10 +23,16 @@ export function genreLabelFor(genre: string) {
 export function GenreSelect({
   defaultValue,
   required,
+  allowAll,
   className,
 }: {
   defaultValue?: string;
   required?: boolean;
+  // Makes the empty option a real, selectable "All genres" choice instead of
+  // an unselectable placeholder — for filters (e.g. search) where "no genre
+  // picked" is a valid, clearable state, unlike book creation/editing where
+  // a genre is mandatory.
+  allowAll?: boolean;
   className?: string;
 }) {
   return (
@@ -36,8 +42,8 @@ export function GenreSelect({
       defaultValue={defaultValue ?? ""}
       className={className}
     >
-      <option value="" disabled>
-        Genre
+      <option value="" disabled={!allowAll}>
+        {allowAll ? "All genres" : "Genre"}
       </option>
       {GENRES.map((genre) => (
         <option key={genre.value} value={genre.value}>
