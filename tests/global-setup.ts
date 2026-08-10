@@ -27,7 +27,10 @@ export default async function globalSetup(config: FullConfig) {
   await page.goto("/en/login");
   await page.fill("[name=email]", email);
   await page.fill("[name=password]", password);
-  await page.click('button:has-text("Log in")');
+  // Scoped to the form specifically — the Log in/Sign up tab picker also
+  // renders a same-labeled "Log in" <button> for the tab itself, which an
+  // unscoped selector matches first.
+  await page.click('form button:has-text("Log in")');
   await page.waitForURL(/\/en\/account/);
 
   fs.mkdirSync(path.dirname(AUTH_FILE), { recursive: true });
