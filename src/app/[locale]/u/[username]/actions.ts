@@ -21,7 +21,9 @@ async function uploadAvatar(
   return data.publicUrl;
 }
 
-async function deleteAvatarFiles(supabase: SupabaseClient, userId: string) {
+// Exported for settings/actions.ts's deleteAccount, same reasoning as
+// deleteBookCoverFiles (dashboard/books/actions.ts).
+export async function deleteAvatarFiles(supabase: SupabaseClient, userId: string) {
   const { data: existing } = await supabase.storage
     .from("avatars")
     .list(userId);

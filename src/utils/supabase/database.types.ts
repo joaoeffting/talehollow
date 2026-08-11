@@ -420,45 +420,6 @@ export type Database = {
           },
         ]
       }
-      scrapbook_entries: {
-        Row: {
-          author_id: string
-          content: string
-          created_at: string | null
-          id: string
-          profile_id: string
-        }
-        Insert: {
-          author_id: string
-          content: string
-          created_at?: string | null
-          id?: string
-          profile_id: string
-        }
-        Update: {
-          author_id?: string
-          content?: string
-          created_at?: string | null
-          id?: string
-          profile_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "scrapbook_entries_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "scrapbook_entries_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       saved_books: {
         Row: {
           book_id: string
@@ -493,6 +454,45 @@ export type Database = {
           {
             foreignKeyName: "saved_books_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scrapbook_entries: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scrapbook_entries_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scrapbook_entries_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -581,6 +581,7 @@ export type Database = {
       }
     }
     Functions: {
+      delete_own_account: { Args: never; Returns: undefined }
       record_anon_view: {
         Args: { p_chapter_id: string; p_viewer_key: string }
         Returns: undefined

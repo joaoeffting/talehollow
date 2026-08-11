@@ -15,10 +15,10 @@ export default async function HomePage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; accountDeleted?: string }>;
 }) {
   const { locale } = await params;
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, accountDeleted } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
   const supabase = await createClient();
 
@@ -56,6 +56,11 @@ export default async function HomePage({
 
   return (
     <div className="space-y-6 py-12">
+      {accountDeleted && (
+        <p className="rounded border border-primary bg-primary/5 p-3 text-sm">
+          Your account and everything tied to it has been deleted.
+        </p>
+      )}
       {/* Reading progress is browser-local only (src/lib/last-read.ts) — this
           only makes sense on the un-paginated main view, not page 2+. */}
       {page === 1 && <ContinueReadingSection />}

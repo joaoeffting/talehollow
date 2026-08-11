@@ -69,12 +69,13 @@ async function uploadBookCover(
   return data.publicUrl;
 }
 
-// Shared by updateBook (replacing a cover), removeCover, and deleteBook
-// (cleaning up on the way out) — all three need "whatever's currently in
-// this book's cover folder, gone," so it's pulled out rather than repeated
-// three times. Storage has no equivalent of SQL's `on delete cascade`, so
-// nothing does this automatically.
-async function deleteBookCoverFiles(supabase: SupabaseClient, bookId: string) {
+// Shared by updateBook (replacing a cover), removeCover, deleteBook, and
+// settings/actions.ts's deleteAccount (cleaning up every book's cover on
+// the way out) — all need "whatever's currently in this book's cover
+// folder, gone," so it's pulled out rather than repeated. Storage has no
+// equivalent of SQL's `on delete cascade`, so nothing does this
+// automatically.
+export async function deleteBookCoverFiles(supabase: SupabaseClient, bookId: string) {
   const { data: existing } = await supabase.storage
     .from("book-covers")
     .list(bookId);

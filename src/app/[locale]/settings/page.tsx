@@ -1,13 +1,21 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-import { updateSiteLanguage, updateContentLanguage } from "./actions";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import {
+  updateSiteLanguage,
+  updateContentLanguage,
+  deleteAccount,
+} from "./actions";
 
 export default async function SettingsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { locale } = await params;
+  const { error } = await searchParams;
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect(`/${locale}/login`);
@@ -51,7 +59,7 @@ export default async function SettingsPage({
         <label className="block text-sm font-medium">Story language</label>
         <p className="text-xs text-muted-foreground">
           Which language of stories should we show you? This is separate from
-          the site's own language above.
+          the site&apos;s own language above.
         </p>
         <select
           name="content_language"
@@ -65,6 +73,24 @@ export default async function SettingsPage({
           Save
         </button>
       </form>
+
+      <div className="space-y-2 rounded border border-destructive p-4">
+        <h2 className="font-medium text-destructive">Danger zone</h2>
+        <p className="text-sm text-muted-foreground">
+          Permanently delete your account — your profile, published books and
+          chapters, comments, likes, follows, and everything else tied to it.
+          This can&apos;t be undone.
+        </p>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <form action={deleteAccount.bind(null, locale)}>
+          <ConfirmSubmitButton
+            confirmMessage="Delete your account and everything you've posted? This can't be undone."
+            className="rounded border border-destructive px-3 py-1 text-sm text-destructive"
+          >
+            Delete account
+          </ConfirmSubmitButton>
+        </form>
+      </div>
     </div>
   );
 }
