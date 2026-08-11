@@ -5,6 +5,13 @@
 // localStorage alone, with no follow-up fetch needed.
 const STORAGE_PREFIX = "storyloom:last-read:";
 
+// The native "storage" event (listened for below) never fires in the tab
+// that made the change — only other tabs — so removeLastRead dispatches
+// this manually to let same-tab UI (e.g. a remove button in
+// ContinueReadingSection) update immediately instead of waiting for a
+// remount.
+const LOCAL_CHANGE_EVENT = "storyloom:last-read-local-change";
+
 export type LastRead = {
   bookId: string;
   bookTitle: string;
@@ -25,14 +32,35 @@ export function setLastRead(entry: LastRead) {
   }
 }
 
+// Lets a reader dismiss a book from the Continue Reading shelf. There's only
+// one stored pointer per book (not a full per-chapter history), so this also
+// clears whatever Read/Reading badges and "Continue reading Ch. N" button
+// ChapterListWithProgress was deriving from it — the correct behavior here,
+// not a side effect to work around, since "remove from Continue Reading" and
+// "forget my progress on this book" are the same thing for this data model.
+export function removeLastRead(bookId: string) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(STORAGE_PREFIX + bookId);
+  } catch {
+    // See setLastRead above — not worth crashing the page over.
+  }
+  window.dispatchEvent(new Event(LOCAL_CHANGE_EVENT));
+}
+
 // localStorage only fires a native "storage" event in *other* tabs, never
-// the one that made the change — but that's fine here, since the only
-// writer (LastReadTracker) lives on the chapter page, a different mounted
-// component than either reader below, so a fresh mount already gets a
-// fresh snapshot. This subscription just keeps multi-tab reading in sync.
+// the one that made the change — fine for LastReadTracker's writes, since
+// it lives on the chapter page, a different mounted component than either
+// reader below, so a fresh mount already gets a fresh snapshot. removeLastRead
+// above needs the same-tab case too (a remove button living right inside
+// ContinueReadingSection itself), hence also listening for its manual event.
 export function subscribeToLastRead(callback: () => void) {
   window.addEventListener("storage", callback);
-  return () => window.removeEventListener("storage", callback);
+  window.addEventListener(LOCAL_CHANGE_EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(LOCAL_CHANGE_EVENT, callback);
+  };
 }
 
 // useSyncExternalStore requires getSnapshot to return a referentially

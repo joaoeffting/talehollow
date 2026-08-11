@@ -1,10 +1,15 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { BookCoverThumbnail } from "@/components/book-cover-thumbnail";
 import { withSlug } from "@/lib/slug";
-import { getAllLastReadSnapshot, subscribeToLastRead } from "@/lib/last-read";
+import {
+  getAllLastReadSnapshot,
+  removeLastRead,
+  subscribeToLastRead,
+} from "@/lib/last-read";
 
 const EMPTY: never[] = [];
 
@@ -28,7 +33,15 @@ export function ContinueReadingSection() {
       <h2 className="text-xl font-semibold">Continue reading</h2>
       <ul className="flex gap-3 overflow-x-auto pb-2">
         {entries.map((entry) => (
-          <li key={entry.bookId} className="w-24 shrink-0">
+          <li key={entry.bookId} className="relative w-24 shrink-0">
+            <button
+              type="button"
+              onClick={() => removeLastRead(entry.bookId)}
+              aria-label={`Remove ${entry.bookTitle} from Continue reading`}
+              className="absolute top-0 right-0 z-10 rounded-full bg-background/80 p-0.5 text-muted-foreground hover:bg-muted hover:text-destructive"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
             <Link
               href={`/books/${withSlug(entry.bookId, entry.bookTitle)}/chapters/${withSlug(entry.chapterId, entry.chapterTitle)}`}
             >
