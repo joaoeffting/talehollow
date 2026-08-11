@@ -4,12 +4,21 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { SITE_URL } from "@/lib/site";
 
+// Empty/missing rather than "" — Turnstile hasn't been set up
+// (NEXT_PUBLIC_TURNSTILE_SITE_KEY unset) renders no widget and no field at
+// all, and Supabase only expects captchaToken to be present once CAPTCHA
+// protection is actually turned on in the Dashboard.
+function captchaTokenFrom(formData: FormData) {
+  return (formData.get("captchaToken") as string) || undefined;
+}
+
 export async function login(locale: string, formData: FormData) {
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithPassword({
     email: formData.get("email") as string,
     password: formData.get("password") as string,
+    options: { captchaToken: captchaTokenFrom(formData) },
   });
 
   // Back to the same tab, with Supabase's own message (e.g. "Invalid login
@@ -33,7 +42,10 @@ export async function signup(locale: string, formData: FormData) {
     // `locale` rides along here too, not just `username` — Phase 3's
     // updated trigger reads it to default a brand-new profile's language
     // preferences to whatever locale the reader signed up from.
-    options: { data: { username: formData.get("username") as string, locale } },
+    options: {
+      data: { username: formData.get("username") as string, locale },
+      captchaToken: captchaTokenFrom(formData),
+    },
   });
 
   if (error) {
@@ -54,6 +66,7 @@ export async function requestPasswordReset(locale: string, formData: FormData) {
   // /verify redirect entirely. See src/app/auth/confirm/route.ts.
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${SITE_URL}/reset-password`,
+    captchaToken: captchaTokenFrom(formData),
   });
 
   // Supabase already replies with success for an email that doesn't exist

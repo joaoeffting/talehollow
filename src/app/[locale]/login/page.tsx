@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import { login, signup } from "./actions";
 
 const TAB_VALUES = ["login", "signup"] as const;
@@ -49,6 +50,7 @@ export default async function LoginPage({
               placeholder="Password"
               className="w-full rounded border p-2"
             />
+            <TurnstileWidget />
             <div className="flex items-center justify-between">
               <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
                 Log in
@@ -88,6 +90,7 @@ export default async function LoginPage({
               placeholder="Password"
               className="w-full rounded border p-2"
             />
+            <TurnstileWidget />
             <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
               Sign up
             </button>

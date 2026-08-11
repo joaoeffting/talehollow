@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import { requestPasswordReset } from "../login/actions";
 
 export default async function ForgotPasswordPage({
@@ -31,6 +32,7 @@ export default async function ForgotPasswordPage({
             placeholder="Email"
             className="w-full rounded border p-2"
           />
+          <TurnstileWidget />
           <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
             Send reset link
           </button>
