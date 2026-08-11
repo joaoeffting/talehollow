@@ -73,6 +73,19 @@ export default async function RootLayout({
               </div>
             </header>
             <main className="mx-auto max-w-5xl p-4">{children}</main>
+            <footer className="border-t">
+              <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 p-4 text-sm text-muted-foreground">
+                <p>© {new Date().getFullYear()} Storyloom</p>
+                <div className="flex gap-4">
+                  <Link href="/terms" className="hover:text-foreground">
+                    Terms
+                  </Link>
+                  <Link href="/privacy" className="hover:text-foreground">
+                    Privacy
+                  </Link>
+                </div>
+              </div>
+            </footer>
           </Providers>
         </NextIntlClientProvider>
       </body>
