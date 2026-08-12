@@ -9,6 +9,7 @@ import { PostHogPageview } from "@/components/posthog-pageview";
 import { AnalyticsConsentBanner } from "@/components/analytics-consent-banner";
 import { CookiePreferencesLink } from "@/components/cookie-preferences-link";
 import { NavAuthLinks } from "@/components/nav-auth-links";
+import { BottomNav } from "@/components/bottom-nav";
 import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
@@ -74,8 +75,10 @@ export default async function RootLayout({
                 <NavAuthLinks locale={locale} />
               </div>
             </header>
-            <main className="mx-auto max-w-5xl p-4">{children}</main>
-            <footer className="border-t">
+            {/* pb-20 clears BottomNavBar's fixed height at every screen
+                size — it's shown always, not just on mobile. */}
+            <main className="mx-auto max-w-5xl p-4 pb-20">{children}</main>
+            <footer className="border-t pb-20">
               <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 p-4 text-sm text-muted-foreground">
                 <p>© {new Date().getFullYear()} Storyloom</p>
                 <div className="flex gap-4">
@@ -90,6 +93,7 @@ export default async function RootLayout({
               </div>
             </footer>
             <AnalyticsConsentBanner />
+            <BottomNav />
           </Providers>
         </NextIntlClientProvider>
       </body>

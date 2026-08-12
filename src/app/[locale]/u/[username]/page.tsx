@@ -10,7 +10,8 @@ import { FollowButton } from "@/components/follow-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { SaveButton } from "@/components/save-button";
 import { ScrapbookSection } from "@/components/scrapbook-section";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ProfileTabs } from "@/components/profile-tabs";
 import { withSlug } from "@/lib/slug";
 import { getBookRankingsLookup } from "@/lib/book-rankings";
 import { getSavedBookIds } from "@/lib/saved-books";
@@ -46,11 +47,6 @@ function ProfileListItem({
   );
 }
 
-// "saved" is only ever a valid *value* here — the tab trigger itself is
-// still owner-gated below, so a stranger passing ?tab=saved just falls
-// through with no matching trigger to select (Tabs quietly no-ops).
-const TAB_VALUES = ["books", "scrapbook", "saved"] as const;
-
 export async function generateMetadata({
   params,
 }: {
@@ -81,13 +77,10 @@ export async function generateMetadata({
 
 export default async function ProfilePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string; username: string }>;
-  searchParams: Promise<{ tab?: string }>;
 }) {
   const { locale, username } = await params;
-  const { tab } = await searchParams;
   const supabase = await createClient();
 
   const { data: profile } = await supabase
@@ -101,14 +94,6 @@ export default async function ProfilePage({
   const { data: claims } = await supabase.auth.getClaims();
   const isOwner = claims?.claims?.sub === profile.id;
 
-  // Lets a link jump straight to a specific tab (e.g. a reported scrapbook
-  // entry from the admin reports page) via ?tab=scrapbook — falls back to
-  // "books" for anything missing, not a real tab value, or ("saved") not
-  // available to this particular viewer.
-  const requestedTab = TAB_VALUES.includes(tab as (typeof TAB_VALUES)[number])
-    ? (tab as (typeof TAB_VALUES)[number])
-    : "books";
-  const initialTab = requestedTab === "saved" && !isOwner ? "books" : requestedTab;
   const updateWithUsername = updateProfile.bind(null, username, locale);
 
   // Only that author's published books — a visitor should never see a
@@ -233,7 +218,7 @@ export default async function ProfilePage({
         </FollowListDialog>
       </div>
 
-      <Tabs defaultValue={initialTab}>
+      <ProfileTabs isOwner={isOwner}>
         <TabsList>
           <TabsTrigger value="books">Books</TabsTrigger>
           <TabsTrigger value="scrapbook">Scrapbook</TabsTrigger>
@@ -348,7 +333,7 @@ export default async function ProfilePage({
             </ul>
           </TabsContent>
         )}
-      </Tabs>
+      </ProfileTabs>
     </div>
   );
 }

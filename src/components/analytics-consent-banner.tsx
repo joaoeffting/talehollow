@@ -23,7 +23,10 @@ export function AnalyticsConsentBanner() {
   if (consent !== null) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t bg-background p-4 shadow-lg">
+    // Lifted clear of BottomNavBar's fixed bar (shown at every screen size)
+    // — otherwise the two fixed-bottom elements overlap and the nav's icons
+    // become unclickable underneath this banner until a decision is made.
+    <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-50 border-t bg-background p-4 shadow-lg">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
           We&apos;d like to use analytics cookies to understand how Storyloom
