@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
+import { sanitizeChapterHtml } from "@/lib/sanitize-chapter-html";
 
 export async function toggleChapterPublished(
   chapterId: string,
@@ -50,7 +51,7 @@ export async function createChapter(
     book_id: bookId,
     position: (count ?? 0) + 1,
     title: formData.get("title") as string,
-    content: formData.get("content") as string,
+    content: sanitizeChapterHtml(formData.get("content") as string),
   });
 
   revalidatePath(`/${locale}/dashboard/books/${bookId}`);
@@ -68,7 +69,7 @@ export async function updateChapter(
     .from("chapters")
     .update({
       title: formData.get("title") as string,
-      content: formData.get("content") as string,
+      content: sanitizeChapterHtml(formData.get("content") as string),
     })
     .eq("id", chapterId);
 

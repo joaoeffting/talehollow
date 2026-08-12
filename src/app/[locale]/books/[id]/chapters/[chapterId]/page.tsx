@@ -9,6 +9,8 @@ import { CommentSection } from "./comment-section";
 import { ReportButton } from "@/components/report-button";
 import { withSlug } from "@/lib/slug";
 import { SITE_URL } from "@/lib/site";
+import { sanitizeChapterHtml } from "@/lib/sanitize-chapter-html";
+import { safeJsonLd } from "@/lib/json-ld";
 
 export async function generateMetadata({
   params,
@@ -125,7 +127,7 @@ export default async function ChapterPage({
         // Ties this page back to its parent Book, and reflects its place in
         // the table of contents via `position`.
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "Chapter",
             name: chapter.title,
@@ -140,7 +142,7 @@ export default async function ChapterPage({
         // Lets search results show a "Home > Book > Chapter" breadcrumb
         // trail instead of a bare URL.
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
@@ -179,7 +181,9 @@ export default async function ChapterPage({
       <h1 className="text-2xl font-semibold mt-5">{chapter.title}</h1>
       <div
         className="prose max-w-none"
-        dangerouslySetInnerHTML={{ __html: chapter.content ?? "" }}
+        dangerouslySetInnerHTML={{
+          __html: sanitizeChapterHtml(chapter.content ?? ""),
+        }}
       />
       <div className="flex items-center gap-4">
         <LikeButton

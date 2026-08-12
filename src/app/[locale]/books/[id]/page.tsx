@@ -8,6 +8,7 @@ import { ReportButton } from "@/components/report-button";
 import { SaveButton } from "@/components/save-button";
 import { ChapterListWithProgress } from "@/components/chapter-list-with-progress";
 import { withSlug } from "@/lib/slug";
+import { safeJsonLd } from "@/lib/json-ld";
 
 export async function generateMetadata({
   params,
@@ -122,7 +123,7 @@ export default async function PublicBookPage({
         // specifically a "Book" (with an author, genre, etc.), not just a
         // blob of text — can surface richer results than a plain title/description.
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "Book",
             name: book.title,
