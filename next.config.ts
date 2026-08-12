@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   images: {
@@ -44,4 +45,20 @@ const nextConfig: NextConfig = {
 
 const withNextIntl = createNextIntlPlugin();
 
-export default withNextIntl(nextConfig);
+// withSentryConfig's own job (webpack/turbopack build instrumentation) runs
+// unconditionally — that part is safe with no Sentry project configured
+// yet. Only the *source map upload* step needs org/project/authToken, and
+// Sentry's build tooling skips that step with a warning, not a build
+// failure, when they're unset — verified by actually running `next build`
+// with none of these set. Fill in SENTRY_ORG/SENTRY_PROJECT/SENTRY_AUTH_TOKEN
+// in .env.local once a real Sentry project exists.
+export default withSentryConfig(withNextIntl(nextConfig), {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: !process.env.CI,
+  // Sentry's own webpack/turbopack plugin normally phones home with
+  // anonymous usage stats — off, consistent with everything else in this
+  // project only sending data with real, deliberate configuration.
+  telemetry: false,
+});
