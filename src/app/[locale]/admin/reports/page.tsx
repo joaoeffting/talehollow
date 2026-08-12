@@ -1,15 +1,20 @@
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
 // reports.target_id is a polymorphic reference (Phase 16 uses a check
 // constraint on target_type instead of a real foreign key, since a report
 // can point at three different tables) — so there's no join Supabase can
 // follow automatically. Resolving these takes one extra lookup per target
 // type, batched by id rather than one query per report row.
+//
+// supabase typed via the app's own createClient return type, not the bare
+// SupabaseClient from @supabase/supabase-js — the untyped generic drops the
+// Database generic entirely, which is what made a to-one profiles embed
+// infer as an array below (TypeScript couldn't see the FK's uniqueness
+// without it).
 async function resolveTargetLinks(
-  supabase: SupabaseClient,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   reports: { target_type: string; target_id: string }[],
 ) {
   const links = new Map<string, string>();
@@ -98,7 +103,9 @@ export default async function AdminReportsPage({
               </p>
               <p>{report.reason}</p>
               <p className="text-muted-foreground">
-                {new Date(report.created_at).toLocaleString()}
+                {report.created_at
+                  ? new Date(report.created_at).toLocaleString()
+                  : null}
               </p>
             </li>
           );

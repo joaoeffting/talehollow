@@ -26,21 +26,21 @@ function ProfileListItem({
   avatarUrl,
 }: {
   username: string;
-  displayName: string;
+  displayName: string | null;
   avatarUrl: string | null;
 }) {
   const initials = (displayName ?? username ?? "?").slice(0, 2).toUpperCase();
   return (
     <li className="flex items-center gap-3 p-4">
       <Avatar className="h-9 w-9">
-        <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
+        <AvatarImage src={avatarUrl ?? undefined} alt={displayName ?? username} />
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
       <Link
         href={`/u/${username}`}
         className="font-medium text-primary underline underline-offset-4 hover:text-accent"
       >
-        {displayName}
+        {displayName ?? username}
       </Link>
     </li>
   );

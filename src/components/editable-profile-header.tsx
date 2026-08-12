@@ -12,7 +12,7 @@ export function EditableProfileHeader({
 }: {
   profile: {
     username: string;
-    display_name: string;
+    display_name: string | null;
     bio: string | null;
     avatar_url: string | null;
   };
@@ -38,7 +38,9 @@ export function EditableProfileHeader({
           <AvatarFallback className="text-lg">{initials}</AvatarFallback>
         </Avatar>
         <div>
-          <h1 className="text-2xl font-semibold">{profile.display_name}</h1>
+          <h1 className="text-2xl font-semibold">
+            {profile.display_name ?? profile.username}
+          </h1>
           <p className="text-muted-foreground">@{profile.username}</p>
           {profile.bio && <p>{profile.bio}</p>}
           {isOwner && (
@@ -72,7 +74,7 @@ export function EditableProfileHeader({
       />
       <input
         name="display_name"
-        defaultValue={profile.display_name}
+        defaultValue={profile.display_name ?? ""}
         className="w-full rounded border p-2"
       />
       <textarea

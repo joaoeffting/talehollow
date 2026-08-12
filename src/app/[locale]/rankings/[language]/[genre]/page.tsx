@@ -75,7 +75,20 @@ export default async function GenreRankingPage({
         {genreLabel} rankings ({language.toUpperCase()})
       </h1>
       <ol className="divide-y rounded border">
-        {rankings?.map((book, i) => (
+        {/* book_rankings' view-derived types mark every column nullable
+            (Postgres/Supabase's introspection doesn't carry NOT NULL
+            through a view the way it does for a real table) — a row
+            without an id or title isn't something there's ever a real
+            case for, so it's dropped rather than rendered with a
+            fallback. */}
+        {rankings
+          ?.filter(
+            (
+              book,
+            ): book is typeof book & { id: string; title: string } =>
+              book.id !== null && book.title !== null,
+          )
+          .map((book, i) => (
           <BookListItem
             key={book.id}
             href={`/books/${withSlug(book.id, book.title)}`}

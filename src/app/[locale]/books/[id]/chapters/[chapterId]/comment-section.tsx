@@ -11,11 +11,11 @@ import { postComment, deleteComment } from "../../../actions";
 type Comment = {
   id: string;
   content: string;
-  created_at: string;
+  created_at: string | null;
   user_id: string;
   profiles: {
     username: string;
-    display_name: string;
+    display_name: string | null;
     avatar_url: string | null;
   };
 };
@@ -93,15 +93,17 @@ export function CommentSection({
 
       <ul className="space-y-3">
         {optimisticComments.map((comment) => {
-          const initials = comment.profiles.display_name
-            .slice(0, 2)
-            .toUpperCase();
+          // display_name can be null (never set) — same fallback-to-username
+          // pattern used elsewhere in the app (e.g. nav-auth-links.tsx).
+          const displayName =
+            comment.profiles.display_name ?? comment.profiles.username;
+          const initials = displayName.slice(0, 2).toUpperCase();
           return (
             <li key={comment.id} className="flex gap-3 rounded border p-3">
               <Avatar className="h-8 w-8 shrink-0">
                 <AvatarImage
                   src={comment.profiles.avatar_url ?? undefined}
-                  alt={comment.profiles.display_name}
+                  alt={displayName}
                 />
                 <AvatarFallback className="text-xs">{initials}</AvatarFallback>
               </Avatar>
@@ -116,16 +118,17 @@ export function CommentSection({
                       href={`/u/${comment.profiles.username}`}
                       className="hover:underline"
                     >
-                      {comment.profiles.display_name}
+                      {displayName}
                     </Link>
                   ) : (
-                    comment.profiles.display_name
+                    displayName
                   )}
                   <span className="text-xs font-normal text-muted-foreground">
-                    {format.dateTime(new Date(comment.created_at), {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })}
+                    {comment.created_at &&
+                      format.dateTime(new Date(comment.created_at), {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
                   </span>
                 </p>
                 <p>{comment.content}</p>

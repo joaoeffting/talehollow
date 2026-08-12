@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import * as Sentry from "@sentry/nextjs";
 import { createClient } from "@/utils/supabase/server";
 import { sanitizeChapterHtml } from "@/lib/sanitize-chapter-html";
 
@@ -23,8 +24,27 @@ export async function toggleChapterPublished(
     // notify_followers_for_book handles the separate, same-calendar-day
     // notification throttle. Gated independently on purpose — a push and a
     // notification blast don't have to happen on the same cadence.
-    await supabase.rpc("record_chapter_publish", { p_book_id: bookId });
-    await supabase.rpc("notify_followers_for_book", { p_book_id: bookId });
+    //
+    // Both errors are reported (not thrown) rather than silently ignored —
+    // notify_followers_for_book previously failed on every single call
+    // (PGRST202, the function didn't exist in the live DB at all) with
+    // nobody noticing for exactly this reason. A failed push/notification
+    // shouldn't block the chapter from publishing, but it should be
+    // visible somewhere now that there's error tracking to send it to.
+    const [pushResult, notifyResult] = await Promise.all([
+      supabase.rpc("record_chapter_publish", { p_book_id: bookId }),
+      supabase.rpc("notify_followers_for_book", { p_book_id: bookId }),
+    ]);
+    if (pushResult.error) {
+      Sentry.captureException(pushResult.error, {
+        extra: { rpc: "record_chapter_publish", bookId, chapterId },
+      });
+    }
+    if (notifyResult.error) {
+      Sentry.captureException(notifyResult.error, {
+        extra: { rpc: "notify_followers_for_book", bookId, chapterId },
+      });
+    }
   }
 
   revalidatePath(`/${locale}/dashboard/books/${bookId}`);

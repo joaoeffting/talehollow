@@ -12,8 +12,8 @@ type ScrapbookEntry = {
   id: string;
   content: string;
   author_id: string;
-  created_at: string;
-  profiles: { username: string; display_name: string };
+  created_at: string | null;
+  profiles: { username: string; display_name: string | null };
 };
 
 export function ScrapbookSection({
@@ -84,12 +84,13 @@ export function ScrapbookSection({
           return (
             <li key={entry.id} className="rounded border p-3">
               <p className="flex items-baseline gap-2 text-sm font-medium">
-                {entry.profiles.display_name}
+                {entry.profiles.display_name ?? entry.profiles.username}
                 <span className="text-xs font-normal text-muted-foreground">
-                  {format.dateTime(new Date(entry.created_at), {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
+                  {entry.created_at &&
+                    format.dateTime(new Date(entry.created_at), {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
                 </span>
               </p>
               <p>{entry.content}</p>
