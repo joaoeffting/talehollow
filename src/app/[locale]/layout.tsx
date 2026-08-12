@@ -6,6 +6,8 @@ import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { Providers } from "../providers";
 import { PostHogPageview } from "@/components/posthog-pageview";
+import { AnalyticsConsentBanner } from "@/components/analytics-consent-banner";
+import { CookiePreferencesLink } from "@/components/cookie-preferences-link";
 import { NavAuthLinks } from "@/components/nav-auth-links";
 import { SITE_URL } from "@/lib/site";
 import "../globals.css";
@@ -83,9 +85,11 @@ export default async function RootLayout({
                   <Link href="/privacy" className="hover:text-foreground">
                     Privacy
                   </Link>
+                  <CookiePreferencesLink />
                 </div>
               </div>
             </footer>
+            <AnalyticsConsentBanner />
           </Providers>
         </NextIntlClientProvider>
       </body>

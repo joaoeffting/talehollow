@@ -14,6 +14,11 @@ export function PostHogPageview() {
 
   useEffect(() => {
     if (!pathname) return;
+    // Providers only calls posthog.init() once consent is accepted — this
+    // guards the same condition here rather than assuming it, since a
+    // route change can fire before that effect has run (or when consent
+    // was never given at all).
+    if (!posthog.__loaded) return;
 
     let url = window.origin + pathname;
     if (searchParams.toString()) url += `?${searchParams.toString()}`;

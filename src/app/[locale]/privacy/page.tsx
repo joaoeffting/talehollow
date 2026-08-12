@@ -36,18 +36,22 @@ export default function PrivacyPage() {
         posts, comments) is, by nature, public and visible to other visitors.
       </p>
       <p>
-        <strong>Usage &amp; analytics data.</strong> We use PostHog to
-        understand how the Service is used — page views, general device/browser
-        information, and an approximate location derived from your IP address.
-        We don&apos;t use this to build advertising profiles, and we don&apos;t
-        sell it.
+        <strong>Usage &amp; analytics data.</strong> If you accept the cookie
+        banner shown on your first visit, we use PostHog to understand how
+        the Service is used — page views, general device/browser
+        information, and an approximate location derived from your IP
+        address. We don&apos;t use this to build advertising profiles, and
+        we don&apos;t sell it. Nothing is sent to PostHog unless you accept —
+        you can change your choice at any time via &quot;Cookie
+        preferences&quot; in the footer.
       </p>
       <p>
         <strong>Cookies.</strong> A session cookie that keeps you logged in
-        (necessary for the Service to function), an anonymized
+        (necessary for the Service to function), an anonymized{" "}
         <code>anon_id</code> cookie used to prevent the same visitor from
-        inflating view counts (kept for up to a year), and cookies set by
-        PostHog for analytics.
+        inflating view counts (kept for up to a year), a cookie remembering
+        your analytics consent choice, and — only if you&apos;ve accepted
+        that choice — cookies set by PostHog for analytics.
       </p>
       <p>
         <strong>CAPTCHA verification.</strong> We use Cloudflare Turnstile to
@@ -87,12 +91,11 @@ export default function PrivacyPage() {
         We process account and content data because it&apos;s necessary to
         provide the Service you&apos;ve signed up for (performance of a
         contract). We process anti-spam and security data (like the{" "}
-        <code>anon_id</code> cookie) under legitimate interest. Analytics data
-        is currently also processed under legitimate interest — we&apos;re
-        working toward an explicit consent mechanism for analytics cookies for
-        EU/EEA visitors, and this policy will be updated once that&apos;s in
-        place. In the meantime, you can ask us to stop processing your
-        analytics data at any time — see Section 7.
+        <code>anon_id</code> cookie) under legitimate interest. Analytics
+        data is processed only with your consent — nothing is sent to
+        PostHog until you accept the cookie banner, and you can withdraw
+        that consent at any time via &quot;Cookie preferences&quot; in the
+        footer, which stops future tracking immediately.
       </p>
 
       <h2>5. Who we share data with</h2>
