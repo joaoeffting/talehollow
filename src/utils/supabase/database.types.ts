@@ -588,6 +588,7 @@ export type Database = {
     }
     Functions: {
       delete_own_account: { Args: never; Returns: undefined }
+      export_own_data: { Args: never; Returns: Json }
       record_anon_view: {
         Args: { p_chapter_id: string; p_viewer_key: string }
         Returns: undefined

@@ -131,14 +131,16 @@ export default function PrivacyPage() {
 
       <h2>7. Your rights</h2>
       <p>
-        If GDPR applies to you, you have the right to access, correct, delete,
-        or export your data, to object to or restrict certain processing, and
-        to withdraw consent where processing is based on it. To exercise any
-        of these, email{" "}
+        If GDPR applies to you, you have the right to access, correct,
+        delete, or export your data, to object to or restrict certain
+        processing, and to withdraw consent where processing is based on
+        it. Account deletion and data export are both self-service —
+        &quot;Your data&quot; and &quot;Danger zone&quot; in{" "}
+        <Link href="/settings">Settings</Link> — no need to email us for
+        either. For anything else (correcting inaccurate data, objecting to
+        processing), email{" "}
         <a href="mailto:joaoeffting@gmail.com">joaoeffting@gmail.com</a>.
-        Account deletion is currently handled manually on request rather than
-        through a self-service button — we&apos;ll confirm once it&apos;s
-        done. You also have the right to lodge a complaint with your local
+        You also have the right to lodge a complaint with your local
         data protection authority (in Sweden, the{" "}
         <a
           href="https://www.imy.se/"

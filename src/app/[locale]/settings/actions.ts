@@ -48,6 +48,21 @@ export async function updateContentLanguage(
   revalidatePath(`/${locale}/settings`);
 }
 
+export async function exportMyData() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims) throw new Error("Not authenticated");
+
+  // export_own_data() bypasses RLS for exactly this one caller's own rows
+  // (security definer, scoped to auth.uid() internally) — a plain query
+  // per table can't do this alone, since e.g. `reports` is admin-read-only
+  // by RLS; see supabase-data-export.sql for the full reasoning.
+  const { data: exportData, error } = await supabase.rpc("export_own_data");
+  if (error) throw error;
+
+  return exportData;
+}
+
 export async function deleteAccount(locale: string) {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();

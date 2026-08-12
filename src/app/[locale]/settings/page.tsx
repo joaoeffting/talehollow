@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { ExportDataButton } from "@/components/export-data-button";
 import {
   updateSiteLanguage,
   updateContentLanguage,
@@ -73,6 +74,17 @@ export default async function SettingsPage({
           Save
         </button>
       </form>
+
+      <div className="space-y-2 rounded border p-4">
+        <h2 className="font-medium">Your data</h2>
+        <p className="text-sm text-muted-foreground">
+          Download a copy of your data — your profile, books and chapters,
+          comments, likes, views, follows, notifications, reports
+          you&apos;ve filed, scrapbook posts, and saved books — as a JSON
+          file.
+        </p>
+        <ExportDataButton />
+      </div>
 
       <div className="space-y-2 rounded border border-destructive p-4">
         <h2 className="font-medium text-destructive">Danger zone</h2>
