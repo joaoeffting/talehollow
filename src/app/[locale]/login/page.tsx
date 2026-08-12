@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { Link } from "@/i18n/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TurnstileWidget } from "@/components/turnstile-widget";
@@ -14,6 +15,7 @@ export default async function LoginPage({
 }) {
   const { locale } = await params;
   const { tab, error } = await searchParams;
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const initialTab = TAB_VALUES.includes(tab as (typeof TAB_VALUES)[number])
     ? (tab as (typeof TAB_VALUES)[number])
     : "login";
@@ -50,7 +52,7 @@ export default async function LoginPage({
               placeholder="Password"
               className="w-full rounded border p-2"
             />
-            <TurnstileWidget />
+            <TurnstileWidget nonce={nonce} />
             <div className="flex items-center justify-between">
               <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
                 Log in
@@ -90,7 +92,7 @@ export default async function LoginPage({
               placeholder="Password"
               className="w-full rounded border p-2"
             />
-            <TurnstileWidget />
+            <TurnstileWidget nonce={nonce} />
             <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
               Sign up
             </button>

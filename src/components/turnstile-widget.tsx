@@ -21,7 +21,7 @@ declare global {
 // Renders nothing — forms behave exactly as before — until
 // NEXT_PUBLIC_TURNSTILE_SITE_KEY is actually set, so this is safe to ship
 // ahead of finishing the Cloudflare/Supabase Dashboard setup.
-export function TurnstileWidget() {
+export function TurnstileWidget({ nonce }: { nonce?: string }) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const containerRef = useRef<HTMLDivElement>(null);
   const [scriptReady, setScriptReady] = useState(false);
@@ -41,6 +41,7 @@ export function TurnstileWidget() {
     <>
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        nonce={nonce}
         onReady={() => setScriptReady(true)}
       />
       <div ref={containerRef} />

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
@@ -51,6 +52,7 @@ export default async function PublicBookPage({
   const { id, locale } = await params;
   const supabase = await createClient();
   const { data: claims } = await supabase.auth.getClaims();
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   // Two conditions in the query, not one: RLS already hides unpublished
   // books from other users, but the explicit .eq('is_published', true) here
@@ -119,6 +121,7 @@ export default async function PublicBookPage({
     <div className="space-y-6 py-12">
       <script
         type="application/ld+json"
+        nonce={nonce}
         // Structured data search engines can parse to understand this page is
         // specifically a "Book" (with an author, genre, etc.), not just a
         // blob of text — can surface richer results than a plain title/description.

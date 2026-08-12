@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
@@ -57,6 +58,7 @@ export default async function ChapterPage({
 }) {
   const { id, chapterId, locale } = await params;
   const supabase = await createClient();
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   const { data: claims } = await supabase.auth.getClaims();
   if (claims?.claims) {
@@ -124,6 +126,7 @@ export default async function ChapterPage({
     <article className="space-y-6 py-6">
       <script
         type="application/ld+json"
+        nonce={nonce}
         // Ties this page back to its parent Book, and reflects its place in
         // the table of contents via `position`.
         dangerouslySetInnerHTML={{
@@ -139,6 +142,7 @@ export default async function ChapterPage({
       />
       <script
         type="application/ld+json"
+        nonce={nonce}
         // Lets search results show a "Home > Book > Chapter" breadcrumb
         // trail instead of a bare URL.
         dangerouslySetInnerHTML={{
