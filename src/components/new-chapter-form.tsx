@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { RichTextEditor } from "@/components/rich-text-editor";
+import { ChapterEditor } from "@/components/chapter-editor";
 import { SaveWithLoading } from "@/components/save-with-loading";
 
 export function NewChapterForm({
+  bookId,
   action,
 }: {
+  // Scopes the autosave draft to this book — "new:<bookId>", separate from
+  // any existing chapter's own "chapter:<id>" draft.
+  bookId: string;
   // A Server Action passed down as a prop — Next.js serializes the
   // reference so this Client Component can call it without needing its own
   // 'use server' file. Kept as its own small Client Component (rather than
@@ -30,13 +34,7 @@ export function NewChapterForm({
   return (
     <form action={action} className="space-y-2 rounded border p-4">
       <h3 className="font-medium">Add chapter</h3>
-      <input
-        name="title"
-        required
-        placeholder="Chapter title"
-        className="w-full rounded border p-2"
-      />
-      <RichTextEditor name="content" />
+      <ChapterEditor draftKey={`new:${bookId}`} />
       <div className="flex gap-2">
         <SaveWithLoading label="Add chapter" />
         <button

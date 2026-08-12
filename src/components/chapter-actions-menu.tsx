@@ -17,10 +17,6 @@ export function ChapterActionsMenu({
   viewLiveHref,
   onTogglePublished,
   onDelete,
-  onMoveUp,
-  onMoveDown,
-  chapterIndex,
-  chapterCount,
 }: {
   chapterTitle: string;
   isPublished: boolean;
@@ -30,10 +26,6 @@ export function ChapterActionsMenu({
   viewLiveHref: string | null;
   onTogglePublished: () => void;
   onDelete: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  chapterIndex: number;
-  chapterCount: number;
 }) {
   return (
     <DropdownMenu>
@@ -49,20 +41,6 @@ export function ChapterActionsMenu({
         }
       />
       <DropdownMenuContent align="end">
-        <DropdownMenuItem>
-          <form action={onMoveUp}>
-            <button disabled={chapterIndex === 0}>Move up</button>
-          </form>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <form action={onMoveDown}>
-            <button disabled={chapterIndex === chapterCount - 1}>
-              Move down
-            </button>
-          </form>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onTogglePublished}>
           {isPublished ? "Unpublish" : "Publish"}
         </DropdownMenuItem>

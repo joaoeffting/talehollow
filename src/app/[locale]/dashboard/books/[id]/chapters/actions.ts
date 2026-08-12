@@ -106,39 +106,25 @@ export async function deleteChapter(
   revalidatePath(`/${locale}/dashboard/books/${bookId}`);
 }
 
-export async function reorderChapter(
-  chapterId: string,
+export async function reorderChapters(
   bookId: string,
   locale: string,
-  direction: "up" | "down",
+  orderedChapterIds: string[],
 ) {
   const supabase = await createClient();
-  const { data: chapters } = await supabase
-    .from("chapters")
-    .select("id, position")
-    .eq("book_id", bookId)
-    .order("position");
 
-  if (!chapters) return;
-  const index = chapters.findIndex((c) => c.id === chapterId);
-  const swapWith = direction === "up" ? index - 1 : index + 1;
-  // Already at the top/bottom — nothing to swap with, so bail out quietly
-  // rather than letting the swap logic below index out of bounds.
-  if (swapWith < 0 || swapWith >= chapters.length) return;
-
-  const a = chapters[index];
-  const b = chapters[swapWith];
-
-  // Reordering is just swapping the two chapters' `position` values —
-  // no separate "order" table or fractional-index scheme needed at this scale.
-  await supabase
-    .from("chapters")
-    .update({ position: b.position })
-    .eq("id", a.id);
-  await supabase
-    .from("chapters")
-    .update({ position: a.position })
-    .eq("id", b.id);
+  // The drag-and-drop list always hands back the *entire* new order, not a
+  // single move — so this just writes each chapter's index+1 straight
+  // through as its position, no swap logic needed. One update per chapter
+  // is fine at the scale a single book's table of contents actually reaches.
+  await Promise.all(
+    orderedChapterIds.map((chapterId, index) =>
+      supabase
+        .from("chapters")
+        .update({ position: index + 1 })
+        .eq("id", chapterId),
+    ),
+  );
 
   revalidatePath(`/${locale}/dashboard/books/${bookId}`);
 }

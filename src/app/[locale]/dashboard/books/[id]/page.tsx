@@ -1,29 +1,16 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { updateBook, deleteBook, removeCover } from "../actions";
-import {
-  createChapter,
-  updateChapter,
-  deleteChapter,
-  reorderChapter,
-} from "./chapters/actions";
+import { createChapter } from "./chapters/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { CoverInput } from "@/components/cover-input";
-import { RichTextEditor } from "@/components/rich-text-editor";
 import { NewChapterForm } from "@/components/new-chapter-form";
+import { ChapterList } from "@/components/chapter-list";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
 import { SaveWithLoading } from "@/components/save-with-loading";
 import { GenreSelect } from "@/components/genre-select";
 import { toggleBookPublished, publishBookAndChapters } from "../actions";
 import { Link } from "@/i18n/navigation";
-import { toggleChapterPublished } from "./chapters/actions";
-import { ChapterActionsMenu } from "@/components/chapter-actions-menu";
 import { withSlug } from "@/lib/slug";
 
 export default async function EditBookPage({
@@ -165,102 +152,19 @@ export default async function EditBookPage({
         </TabsContent>
 
         <TabsContent value="toc" className="space-y-4">
-          <NewChapterForm action={createChapter.bind(null, book.id, locale)} />
+          <NewChapterForm
+            bookId={book.id}
+            action={createChapter.bind(null, book.id, locale)}
+          />
 
-          <Accordion className="space-y-2">
-            {chapters?.map((chapter, i) => {
-              // Same .bind() pattern as Phase 4 — bakes every id (and locale)
-              // into each action so every chapter's buttons call it with the
-              // right target.
-              const updateWithIds = updateChapter.bind(
-                null,
-                chapter.id,
-                book.id,
-                locale,
-              );
-              const deleteWithIds = deleteChapter.bind(
-                null,
-                chapter.id,
-                book.id,
-                locale,
-              );
-              const moveUp = reorderChapter.bind(
-                null,
-                chapter.id,
-                book.id,
-                locale,
-                "up",
-              );
-              const moveDown = reorderChapter.bind(
-                null,
-                chapter.id,
-                book.id,
-                locale,
-                "down",
-              );
-
-              const toggleWithIds = toggleChapterPublished.bind(
-                null,
-                chapter.id,
-                book.id,
-                locale,
-                chapter.is_published,
-              );
-
-              return (
-                <AccordionItem
-                  key={chapter.id}
-                  value={chapter.id}
-                  className="rounded border px-4 space-between"
-                >
-                  <div className="flex justify-between items-center">
-                    <AccordionTrigger className="flex-1 hover:no-underline">
-                      <span className="flex items-baseline gap-2 text-left">
-                        <span className="text-sm text-muted-foreground">
-                          #{chapter.position}
-                        </span>
-                        <span className="font-medium">{chapter.title}</span>
-                        <span className="text-sm text-muted-foreground">
-                          {chapter.is_published ? "Published" : "Draft"}
-                        </span>
-                      </span>
-                    </AccordionTrigger>
-                    <div className="flex shrink-0 gap-2 text-sm">
-                      <ChapterActionsMenu
-                        chapterTitle={chapter.title}
-                        isPublished={chapter.is_published}
-                        viewLiveHref={
-                          chapter.is_published && book.is_published
-                            ? `/books/${book.id}/chapters/${chapter.id}`
-                            : null
-                        }
-                        onTogglePublished={toggleWithIds}
-                        onDelete={deleteWithIds}
-                        onMoveUp={moveUp}
-                        onMoveDown={moveDown}
-                        chapterIndex={i}
-                        chapterCount={chapters.length}
-                      />
-                    </div>
-                  </div>
-                  <AccordionContent className="space-y-2 pt-2">
-                    <form action={updateWithIds} className="space-y-2">
-                      <input
-                        name="title"
-                        defaultValue={chapter.title}
-                        className="w-full rounded border p-2"
-                      />
-                      <RichTextEditor
-                        name="content"
-                        defaultValue={chapter.content ?? ""}
-                      />
-                      <SaveWithLoading />
-                    </form>
-                  </AccordionContent>
-                </AccordionItem>
-              );
-            })}
-          </Accordion>
+          {chapters && chapters.length > 0 && (
+            <ChapterList
+              chapters={chapters}
+              bookId={book.id}
+              bookIsPublished={book.is_published}
+              locale={locale}
+            />
+          )}
           {chapters?.length === 0 && (
             <p className="rounded border p-4 text-sm text-muted-foreground">
               No chapters yet — add the first one above.

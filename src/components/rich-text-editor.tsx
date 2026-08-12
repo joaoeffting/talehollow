@@ -148,9 +148,14 @@ function Toolbar({ editor }: { editor: Editor | null }) {
 export function RichTextEditor({
   name,
   defaultValue,
+  onChange,
 }: {
   name: string;
   defaultValue?: string;
+  // Purely a side-channel for callers that need to react to content changes
+  // (autosave) — the hidden input below remains the actual source of truth
+  // for form submission either way.
+  onChange?: (html: string) => void;
 }) {
   const hiddenInputRef = useRef<HTMLInputElement>(null);
 
@@ -180,9 +185,11 @@ export function RichTextEditor({
     // typed. Writing straight to the ref on every keystroke keeps the form
     // in sync without a setState (and the re-render that would trigger).
     onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
       if (hiddenInputRef.current) {
-        hiddenInputRef.current.value = editor.getHTML();
+        hiddenInputRef.current.value = html;
       }
+      onChange?.(html);
     },
   });
 
