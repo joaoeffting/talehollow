@@ -36,16 +36,19 @@ export default async function GenreRankingPage({
     .eq("genre", genre)
     .order("score", { ascending: false });
 
-  // book_rankings doesn't carry synopsis (it's a stats-only view) — one
-  // follow-up query against the real books for just the ids on this page,
-  // rather than widening the view for a single display-only field.
+  // book_rankings doesn't carry synopsis or is_mature (it's a stats-only
+  // view) — one follow-up query against the real books for just the ids on
+  // this page, rather than widening the view for display-only fields.
   const bookIds = (rankings ?? []).map((book) => book.id).filter((id) => id !== null);
-  const { data: synopses } = await supabase
+  const { data: bookDetails } = await supabase
     .from("books")
-    .select("id, synopsis")
+    .select("id, synopsis, is_mature")
     .in("id", bookIds);
   const synopsisById = new Map(
-    (synopses ?? []).map((book) => [book.id, book.synopsis]),
+    (bookDetails ?? []).map((book) => [book.id, book.synopsis]),
+  );
+  const matureById = new Map(
+    (bookDetails ?? []).map((book) => [book.id, book.is_mature]),
   );
 
   const genreLabel = genreLabelFor(genre);
@@ -95,6 +98,7 @@ export default async function GenreRankingPage({
                 </Link>
               </>
             }
+            isMature={book.id ? (matureById.get(book.id) ?? false) : false}
             synopsis={book.id ? synopsisById.get(book.id) ?? undefined : undefined}
             stats={{
               views: book.unique_views ?? 0,

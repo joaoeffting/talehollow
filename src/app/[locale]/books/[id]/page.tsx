@@ -131,15 +131,27 @@ export default async function PublicBookPage({
             genre: book.genre,
             inLanguage: book.language,
             description: book.synopsis,
+            ...(book.is_mature ? { contentRating: "Mature" } : {}),
           }),
         }}
       />
       <div>
         <h1 className="text-3xl font-bold">{book.title}</h1>
+        {book.is_mature && (
+          <div className="mt-2 mr-1.25 mb-1.25 rounded border border-destructive bg-destructive/5 p-3 text-sm">
+            <p className="font-medium text-destructive">
+              Mature content warning
+            </p>
+            <p className="text-muted-foreground">
+              {book.content_warning ||
+                "This book contains content that may not be suitable for all audiences (violence, sexual content, or similar)."}
+            </p>
+          </div>
+        )}
         {book.cover_image_url && (
           // Fixed 2:3 aspect ratio, matching the convention already used by
           // BookCoverThumbnail and CoverInput's preview elsewhere in the app.
-          <div className="relative aspect-2/3 w-full max-w-xs">
+          <div className="relative aspect-2/3 w-full max-w-xs mx-auto">
             <Image
               src={book.cover_image_url}
               alt={book.title}

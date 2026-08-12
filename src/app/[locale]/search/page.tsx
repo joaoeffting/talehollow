@@ -56,6 +56,7 @@ export default async function SearchPage({
     title: string;
     genre: string;
     cover_image_url: string | null;
+    is_mature: boolean;
     profiles: { username: string; display_name: string | null };
   }[] = [];
   let hasNextPage = false;
@@ -65,7 +66,7 @@ export default async function SearchPage({
     let dbQuery = supabase
       .from("books")
       .select(
-        "id, title, genre, cover_image_url, profiles!books_author_id_fkey(username, display_name)",
+        "id, title, genre, cover_image_url, is_mature, profiles!books_author_id_fkey(username, display_name)",
       )
       .eq("is_published", true)
       .eq("language", contentLanguage);
@@ -128,6 +129,7 @@ export default async function SearchPage({
                 href={`/books/${withSlug(book.id, book.title)}`}
                 coverImageUrl={book.cover_image_url}
                 title={book.title}
+                isMature={book.is_mature}
                 rankBadge={
                   ranking
                     ? { rank: ranking.rank, genreLabel: genreLabelFor(book.genre) }

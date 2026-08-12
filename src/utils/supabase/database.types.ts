@@ -43,10 +43,12 @@ export type Database = {
       books: {
         Row: {
           author_id: string
+          content_warning: string | null
           cover_image_url: string | null
           created_at: string | null
           genre: string
           id: string
+          is_mature: boolean
           is_published: boolean
           language: string
           last_pushed_at: string | null
@@ -56,10 +58,12 @@ export type Database = {
         }
         Insert: {
           author_id: string
+          content_warning?: string | null
           cover_image_url?: string | null
           created_at?: string | null
           genre: string
           id?: string
+          is_mature?: boolean
           is_published?: boolean
           language?: string
           last_pushed_at?: string | null
@@ -69,10 +73,12 @@ export type Database = {
         }
         Update: {
           author_id?: string
+          content_warning?: string | null
           cover_image_url?: string | null
           created_at?: string | null
           genre?: string
           id?: string
+          is_mature?: boolean
           is_published?: boolean
           language?: string
           last_pushed_at?: string | null

@@ -115,7 +115,7 @@ export default async function ProfilePage({
   // stranger's drafts just by discovering their profile.
   const { data: books } = await supabase
     .from("books")
-    .select("id, title, genre, cover_image_url")
+    .select("id, title, genre, cover_image_url, is_mature")
     .eq("author_id", profile.id)
     .eq("is_published", true)
     .order("last_pushed_at", { ascending: false });
@@ -128,7 +128,9 @@ export default async function ProfilePage({
   const { data: savedBooks } = isOwner
     ? await supabase
         .from("saved_books")
-        .select("book_id, books!inner(id, title, genre, cover_image_url, is_published)")
+        .select(
+          "book_id, books!inner(id, title, genre, cover_image_url, is_mature, is_published)",
+        )
         .eq("user_id", profile.id)
         .eq("books.is_published", true)
     : { data: null };
@@ -248,6 +250,7 @@ export default async function ProfilePage({
                   href={`/books/${withSlug(book.id, book.title)}`}
                   coverImageUrl={book.cover_image_url}
                   title={book.title}
+                  isMature={book.is_mature}
                   meta={book.genre}
                   rankBadge={
                     ranking
@@ -315,6 +318,7 @@ export default async function ProfilePage({
                     href={`/books/${withSlug(book.id, book.title)}`}
                     coverImageUrl={book.cover_image_url}
                     title={book.title}
+                    isMature={book.is_mature}
                     meta={book.genre}
                     rankBadge={
                       ranking

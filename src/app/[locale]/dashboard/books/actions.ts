@@ -99,6 +99,8 @@ export async function createBook(locale: string, formData: FormData) {
       genre: formData.get("genre") as string,
       language: formData.get("language") as string,
       synopsis: formData.get("synopsis") as string,
+      is_mature: formData.get("is_mature") === "on",
+      content_warning: (formData.get("content_warning") as string) || null,
     })
     .select()
     .single();
@@ -144,6 +146,8 @@ export async function updateBook(
       genre: formData.get("genre") as string,
       language: formData.get("language") as string,
       synopsis: formData.get("synopsis") as string,
+      is_mature: formData.get("is_mature") === "on",
+      content_warning: (formData.get("content_warning") as string) || null,
       ...coverUpdate,
     })
     .eq("id", bookId);

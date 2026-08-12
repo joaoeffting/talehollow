@@ -35,6 +35,18 @@ export default async function NewBookPage({
         placeholder="Synopsis"
         className="w-full rounded border p-2"
       />
+      <div className="space-y-1">
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="is_mature" />
+          Contains mature content (violence, sexual content, or other
+          content not suitable for all audiences)
+        </label>
+        <textarea
+          name="content_warning"
+          placeholder="Optional: specific content warnings (e.g. graphic violence, self-harm)"
+          className="w-full rounded border p-2 text-sm"
+        />
+      </div>
       <CoverInput />
       <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
         Create draft

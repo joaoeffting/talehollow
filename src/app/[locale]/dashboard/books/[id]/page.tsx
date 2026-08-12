@@ -124,6 +124,23 @@ export default async function EditBookPage({
               defaultValue={book.synopsis ?? ""}
               className="w-full rounded border p-2"
             />
+            <div className="space-y-1">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  name="is_mature"
+                  defaultChecked={book.is_mature}
+                />
+                Contains mature content (violence, sexual content, or other
+                content not suitable for all audiences)
+              </label>
+              <textarea
+                name="content_warning"
+                defaultValue={book.content_warning ?? ""}
+                placeholder="Optional: specific content warnings (e.g. graphic violence, self-harm)"
+                className="w-full rounded border p-2 text-sm"
+              />
+            </div>
             <CoverInput initialUrl={book?.cover_image_url || undefined} />
             <SaveWithLoading label="Save book" />
           </form>

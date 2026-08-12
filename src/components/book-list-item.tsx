@@ -21,6 +21,7 @@ export function BookListItem({
   coverImageUrl,
   coverSize = "sm",
   title,
+  isMature,
   meta,
   synopsis,
   leading,
@@ -35,6 +36,10 @@ export function BookListItem({
   // the row's visual weight; "sm" (default) for denser lists.
   coverSize?: "sm" | "lg";
   title: string;
+  // Shown on every list surface (feed, rankings, search, profiles) — a
+  // badge alone, not a filter; readers who haven't opted into anything
+  // still see it, they just also know before clicking through.
+  isMature?: boolean;
   meta?: ReactNode;
   // A short excerpt (already truncated by the caller) shown under meta/stats
   // — only worth the vertical space on lists using the larger cover.
@@ -65,12 +70,19 @@ export function BookListItem({
       />
       <div className="flex flex-1 items-start justify-between gap-4">
         <div>
-          <Link
-            href={href}
-            className="font-medium text-primary underline underline-offset-4 hover:text-accent"
-          >
-            {title}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={href}
+              className="font-medium text-primary underline underline-offset-4 hover:text-accent"
+            >
+              {title}
+            </Link>
+            {isMature && (
+              <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-destructive uppercase">
+                Mature
+              </span>
+            )}
+          </div>
           {rankBadge && (
             <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
               #{rankBadge.rank} in {rankBadge.genreLabel}

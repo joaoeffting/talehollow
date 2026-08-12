@@ -42,7 +42,7 @@ export default async function HomePage({
     // Explicit FK name — saved_books also links books to profiles now, so
     // an unqualified "profiles(...)" embed is ambiguous (PGRST201).
     .select(
-      "id, title, genre, cover_image_url, profiles!books_author_id_fkey(username, display_name)",
+      "id, title, genre, cover_image_url, is_mature, profiles!books_author_id_fkey(username, display_name)",
     )
     .eq("is_published", true)
     .eq("language", contentLanguage)
@@ -79,6 +79,7 @@ export default async function HomePage({
               href={`/books/${withSlug(book.id, book.title)}`}
               coverImageUrl={book.cover_image_url}
               title={book.title}
+              isMature={book.is_mature}
               rankBadge={
                 ranking
                   ? { rank: ranking.rank, genreLabel: genreLabelFor(book.genre) }
