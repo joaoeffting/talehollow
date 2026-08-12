@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { Menu, Lightbulb } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +36,18 @@ export function NavMenu({
         }
       />
       <DropdownMenuContent align="end">
+        {/* First, and visually distinct (accent color + icon) — reader/
+            author suggestions are explicitly the thing worth surfacing
+            hardest here, not just another settings-adjacent link. */}
+        <DropdownMenuItem
+          render={
+            <Link href="/feedback" className="font-medium text-accent">
+              <Lightbulb className="h-4 w-4" aria-hidden="true" />
+              Share feedback
+            </Link>
+          }
+        ></DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           render={<Link href="/account">Account</Link>}
         ></DropdownMenuItem>
@@ -55,7 +67,10 @@ export function NavMenu({
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              render={<Link href="/admin/reports">Admin</Link>}
+              render={<Link href="/admin/reports">Reports (Admin)</Link>}
+            ></DropdownMenuItem>
+            <DropdownMenuItem
+              render={<Link href="/admin/feedback">Feedback (Admin)</Link>}
             ></DropdownMenuItem>
           </>
         )}
