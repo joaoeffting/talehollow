@@ -1,4 +1,4 @@
--- Run this in the Supabase SQL editor for the storyloom project.
+-- Run this in the Supabase SQL editor for the talehollow project.
 --
 -- Lets a signed-in reader/author send free-text feedback or suggestions.
 -- Deliberately just a text box + a table, no ticketing workflow — reviewed_at

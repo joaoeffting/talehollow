@@ -36,7 +36,7 @@ export async function generateMetadata({
     plainText.length > 160 ? `${plainText.slice(0, 157)}...` : plainText;
 
   return {
-    title: `${chapter.title} — ${chapter.books.title} — Storyloom`,
+    title: `${chapter.title} — ${chapter.books.title} — Talehollow`,
     description,
     alternates: {
       canonical: `/${locale}/books/${withSlug(id, chapter.books.title)}/chapters/${withSlug(chapterId, chapter.title)}`,
@@ -153,7 +153,7 @@ export default async function ChapterPage({
               {
                 "@type": "ListItem",
                 position: 1,
-                name: "Storyloom",
+                name: "Talehollow",
                 item: `${SITE_URL}/${locale}`,
               },
               {

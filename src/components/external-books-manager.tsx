@@ -235,7 +235,7 @@ export function ExternalBooksManager({
         Published elsewhere
       </p>
       <p className="mb-2 text-xs text-muted-foreground">
-        Cover, synopsis, and a buy link for books you sell outside Storyloom.
+        Cover, synopsis, and a buy link for books you sell outside Talehollow.
         Drag to reorder.
       </p>
 

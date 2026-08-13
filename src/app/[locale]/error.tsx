@@ -39,7 +39,7 @@ export default function Error({
           href="/"
           className="rounded border px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
         >
-          Back to Storyloom
+          Back to Talehollow
         </Link>
       </div>
     </div>

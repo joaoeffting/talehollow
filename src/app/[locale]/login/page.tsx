@@ -26,7 +26,7 @@ export default async function LoginPage({
 
   return (
     <div className="mx-auto max-w-sm space-y-6 py-12">
-      <h1 className="text-2xl font-semibold">Welcome to Storyloom</h1>
+      <h1 className="text-2xl font-semibold">Welcome to Talehollow</h1>
       <Tabs defaultValue={initialTab}>
         <TabsList>
           <TabsTrigger value="login">Log in</TabsTrigger>

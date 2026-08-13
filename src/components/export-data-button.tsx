@@ -21,7 +21,7 @@ export function ExportDataButton() {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `storyloom-data-${new Date().toISOString().slice(0, 10)}.json`;
+      link.download = `talehollow-data-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(url);
       setStatus("idle");

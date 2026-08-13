@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Storyloom",
-  description: "The terms that govern your use of Storyloom.",
+  title: "Terms of Service — Talehollow",
+  description: "The terms that govern your use of Talehollow.",
 };
 
 export default function TermsPage() {
@@ -13,16 +13,16 @@ export default function TermsPage() {
       <p className="text-muted-foreground">Last updated: August 11, 2026</p>
 
       <p>
-        These Terms of Service (&quot;Terms&quot;) govern your use of Storyloom (the
+        These Terms of Service (&quot;Terms&quot;) govern your use of Talehollow (the
         &quot;Service&quot;), operated by Joao Paulo Effting, an individual based in
         Sweden (&quot;we,&quot; &quot;us,&quot; &quot;our&quot;). By creating an account
         or otherwise using the Service, you agree to these Terms. If you don&apos;t
         agree, please don&apos;t use the Service.
       </p>
 
-      <h2>1. What Storyloom is</h2>
+      <h2>1. What Talehollow is</h2>
       <p>
-        Storyloom is a community platform for serialized fiction: authors publish
+        Talehollow is a community platform for serialized fiction: authors publish
         books made up of chapters, and readers discover, follow, and engage with
         that work through views, likes, comments, and public profile activity.
       </p>
@@ -46,7 +46,7 @@ export default function TermsPage() {
 
       <h2>4. Your content</h2>
       <p>
-        You retain ownership of everything you write and post on Storyloom —
+        You retain ownership of everything you write and post on Talehollow —
         books, chapters, comments, scrapbook posts, your profile bio, and any
         images you upload (&quot;Your Content&quot;). By posting Your Content, you
         grant us a worldwide, non-exclusive, royalty-free license to host, store,
@@ -63,14 +63,14 @@ export default function TermsPage() {
       </p>
 
       <h2>5. Acceptable use</h2>
-      <p>You agree not to use Storyloom to:</p>
+      <p>You agree not to use Talehollow to:</p>
       <ul>
         <li>
           Post content that&apos;s illegal, that sexualizes minors in any form, or
           that infringes someone else&apos;s intellectual property rights
         </li>
         <li>Harass, threaten, or deliberately target another user</li>
-        <li>Impersonate any person or entity, including Storyloom staff</li>
+        <li>Impersonate any person or entity, including Talehollow staff</li>
         <li>
           Spam — post repetitive/unsolicited content, or attempt to manipulate
           view counts, likes, comments, or rankings through automated or
@@ -85,7 +85,7 @@ export default function TermsPage() {
 
       <h2>6. Moderation</h2>
       <p>
-        Storyloom includes a reporting tool for flagging books, chapters, and
+        Talehollow includes a reporting tool for flagging books, chapters, and
         scrapbook posts to administrators for review. We may remove content,
         suspend, or terminate accounts that violate these Terms, at our
         discretion, with or without notice.
@@ -93,7 +93,7 @@ export default function TermsPage() {
 
       <h2>7. Third-party services</h2>
       <p>
-        Storyloom is built on top of third-party infrastructure — including
+        Talehollow is built on top of third-party infrastructure — including
         Supabase (database, authentication, file storage), Vercel (hosting),
         PostHog (analytics), and Cloudflare (bot/spam protection). Details on
         what data each of these processes are in our{" "}
@@ -110,7 +110,7 @@ export default function TermsPage() {
 
       <h2>9. The Service is provided &quot;as is&quot;</h2>
       <p>
-        Storyloom is an independently-run, early-stage project. We don&apos;t
+        Talehollow is an independently-run, early-stage project. We don&apos;t
         guarantee the Service will be uninterrupted, error-free, or available
         at any particular time, and we&apos;re not liable for any loss arising
         from your use of (or inability to use) the Service, to the fullest
@@ -130,7 +130,7 @@ export default function TermsPage() {
       <h2>12. Contact</h2>
       <p>
         Questions about these Terms? Reach out to{" "}
-        <a href="mailto:joaoeffting@gmail.com">joaoeffting@gmail.com</a>.
+        <a href="mailto:talehollowapp@gmail.com">talehollowapp@gmail.com</a>.
       </p>
     </div>
   );

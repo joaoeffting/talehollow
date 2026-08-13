@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Storyloom",
-  description: "What data Storyloom collects and how it's used.",
+  title: "Privacy Policy — Talehollow",
+  description: "What data Talehollow collects and how it's used.",
 };
 
 export default function PrivacyPage() {
@@ -14,10 +14,10 @@ export default function PrivacyPage() {
 
       <h2>1. Who we are</h2>
       <p>
-        Storyloom is operated by Joao Paulo Effting, an individual based in
+        Talehollow is operated by Joao Paulo Effting, an individual based in
         Sweden, who is the data controller for the personal data described
         below. You can reach us at{" "}
-        <a href="mailto:joaoeffting@gmail.com">joaoeffting@gmail.com</a> for
+        <a href="mailto:talehollowapp@gmail.com">talehollowapp@gmail.com</a> for
         any privacy question or request.
       </p>
 
@@ -139,7 +139,7 @@ export default function PrivacyPage() {
         <Link href="/settings">Settings</Link> — no need to email us for
         either. For anything else (correcting inaccurate data, objecting to
         processing), email{" "}
-        <a href="mailto:joaoeffting@gmail.com">joaoeffting@gmail.com</a>.
+        <a href="mailto:talehollowapp@gmail.com">talehollowapp@gmail.com</a>.
         You also have the right to lodge a complaint with your local
         data protection authority (in Sweden, the{" "}
         <a
@@ -163,7 +163,7 @@ export default function PrivacyPage() {
 
       <h2>9. Children&apos;s privacy</h2>
       <p>
-        Storyloom isn&apos;t directed at children under 13, and we don&apos;t
+        Talehollow isn&apos;t directed at children under 13, and we don&apos;t
         knowingly collect data from anyone under that age. If you believe a
         child has provided us with personal data, contact us and we&apos;ll
         delete it.
@@ -185,7 +185,7 @@ export default function PrivacyPage() {
 
       <h2>12. Contact</h2>
       <p>
-        <a href="mailto:joaoeffting@gmail.com">joaoeffting@gmail.com</a> — see
+        <a href="mailto:talehollowapp@gmail.com">talehollowapp@gmail.com</a> — see
         also our <Link href="/terms">Terms of Service</Link>.
       </p>
     </div>

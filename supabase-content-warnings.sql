@@ -1,4 +1,4 @@
--- Run this in the Supabase SQL editor for the storyloom project.
+-- Run this in the Supabase SQL editor for the talehollow project.
 --
 -- Lets an author flag a book as containing mature content, with an optional
 -- free-text note on specifics (e.g. "graphic violence, discussion of

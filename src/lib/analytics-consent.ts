@@ -4,8 +4,8 @@
 // stored yet means "haven't asked" (show the banner, don't track) — this is
 // deliberately NOT "declined by default" vs. "accepted by default," it's a
 // genuine third state.
-const STORAGE_KEY = "storyloom:analytics-consent";
-const CHANGE_EVENT = "storyloom:analytics-consent-change";
+const STORAGE_KEY = "talehollow:analytics-consent";
+const CHANGE_EVENT = "talehollow:analytics-consent-change";
 
 export type ConsentValue = "accepted" | "declined";
 

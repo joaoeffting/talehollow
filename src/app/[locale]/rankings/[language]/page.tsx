@@ -54,8 +54,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, language } = await params;
   return {
-    title: `Rankings (${language.toUpperCase()}) — Storyloom`,
-    description: `Browse top-ranked ${language.toUpperCase()} stories by genre on Storyloom.`,
+    title: `Rankings (${language.toUpperCase()}) — Talehollow`,
+    description: `Browse top-ranked ${language.toUpperCase()} stories by genre on Talehollow.`,
     alternates: { canonical: `/${locale}/rankings/${language}` },
   };
 }

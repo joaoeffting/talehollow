@@ -15,8 +15,8 @@ export async function generateMetadata({
   const { locale, language, genre } = await params;
   const genreLabel = genreLabelFor(genre);
   return {
-    title: `${genreLabel} rankings (${language.toUpperCase()}) — Storyloom`,
-    description: `Top-ranked ${genreLabel} stories in ${language.toUpperCase()} on Storyloom, ranked by unique views, likes, and commenters.`,
+    title: `${genreLabel} rankings (${language.toUpperCase()}) — Talehollow`,
+    description: `Top-ranked ${genreLabel} stories in ${language.toUpperCase()} on Talehollow, ranked by unique views, likes, and commenters.`,
     alternates: { canonical: `/${locale}/rankings/${language}/${genre}` },
   };
 }

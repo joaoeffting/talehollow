@@ -1,11 +1,11 @@
-# Storyloom
+# Talehollow
 
 A community platform for serialized fiction — authors publish books made up of
 chapters, readers discover, follow, and engage with them through views, likes,
 comments, and public profile activity. Built as a Wattpad-style platform, with a
 calmer, ad-light reading experience as the explicit positioning against it.
 
-**Live at:** _(add your deployed URL here once you have one)_
+**Live at:** _(deploying to [talehollow.app](https://talehollow.app))_
 
 ## What's actually built
 

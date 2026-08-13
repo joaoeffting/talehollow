@@ -6,7 +6,7 @@ feed), not just that the code compiles.
 
 ## One-time setup
 
-1. Create a real storyloom account through the app UI and confirm its email
+1. Create a real talehollow account through the app UI and confirm its email
    (hosted Supabase auth requires this — there's no local inbox to automate
    against). This account will own every book/chapter the tests seed.
 2. Add to `.env.local`:

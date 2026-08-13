@@ -3,14 +3,14 @@
 // entry (not just ids) means every consumer (the homepage's Continue
 // Reading row, the book page's chapter list) can render immediately from
 // localStorage alone, with no follow-up fetch needed.
-const STORAGE_PREFIX = "storyloom:last-read:";
+const STORAGE_PREFIX = "talehollow:last-read:";
 
 // The native "storage" event (listened for below) never fires in the tab
 // that made the change — only other tabs — so removeLastRead dispatches
 // this manually to let same-tab UI (e.g. a remove button in
 // ContinueReadingSection) update immediately instead of waiting for a
 // remount.
-const LOCAL_CHANGE_EVENT = "storyloom:last-read-local-change";
+const LOCAL_CHANGE_EVENT = "talehollow:last-read-local-change";
 
 export type LastRead = {
   bookId: string;

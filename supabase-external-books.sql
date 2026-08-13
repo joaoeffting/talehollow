@@ -1,9 +1,9 @@
--- Run this in the Supabase SQL editor for the storyloom project.
+-- Run this in the Supabase SQL editor for the talehollow project.
 --
 -- Lets an author showcase finished books they sell elsewhere (Amazon, etc.)
 -- on their profile — cover, synopsis, and a buy link, shown as a carousel
 -- right above the Books/Scrapbook/Saved tabs. Deliberately its own table,
--- not a row in `books`: these aren't Storyloom books with chapters and a
+-- not a row in `books`: these aren't Talehollow books with chapters and a
 -- reader, just a showcase card pointing off-platform.
 create table public.external_books (
   id uuid primary key default gen_random_uuid(),

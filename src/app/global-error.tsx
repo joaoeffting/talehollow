@@ -28,7 +28,7 @@ export default function GlobalError({
   return (
     <html lang="en">
       <head>
-        <title>Something went wrong — Storyloom</title>
+        <title>Something went wrong — Talehollow</title>
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
         <div className="mx-auto max-w-5xl space-y-4 py-24 text-center">
@@ -48,7 +48,7 @@ export default function GlobalError({
               href="/"
               className="rounded border px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
             >
-              Back to Storyloom
+              Back to Talehollow
             </Link>
           </div>
         </div>

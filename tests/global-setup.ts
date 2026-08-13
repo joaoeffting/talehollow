@@ -16,7 +16,7 @@ export default async function globalSetup(config: FullConfig) {
   if (!email || !password) {
     throw new Error(
       "TEST_USER_EMAIL and TEST_USER_PASSWORD must be set (a real, already " +
-        "email-confirmed storyloom account) — see tests/README.md.",
+        "email-confirmed talehollow account) — see tests/README.md.",
     );
   }
 

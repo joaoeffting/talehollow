@@ -1,4 +1,4 @@
--- Run this in the Supabase SQL editor for the storyloom dev project.
+-- Run this in the Supabase SQL editor for the talehollow dev project.
 -- Mirrors the existing follows table's shape: composite primary key, no
 -- separate id column, RLS scoped to the signed-in user.
 

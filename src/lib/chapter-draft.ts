@@ -4,7 +4,7 @@
 // explicitly saved. Keyed by "chapter:<id>" for existing chapters or
 // "new:<bookId>" for the still-unsaved new-chapter form, so each editor
 // instance on the page gets its own independent draft slot.
-const STORAGE_PREFIX = "storyloom:chapter-draft:";
+const STORAGE_PREFIX = "talehollow:chapter-draft:";
 
 export type ChapterDraft = {
   title: string;

@@ -64,7 +64,7 @@ export async function generateMetadata({
 
   if (!profile) return {};
 
-  const title = `${profile.display_name ?? username} (@${username}) — Storyloom`;
+  const title = `${profile.display_name ?? username} (@${username}) — Talehollow`;
   return {
     title,
     description: profile.bio ?? undefined,

@@ -1,4 +1,4 @@
--- Run this in the Supabase SQL editor for the storyloom project.
+-- Run this in the Supabase SQL editor for the talehollow project.
 --
 -- notify_followers_for_book() — this function was referenced by
 -- dashboard/books/[id]/chapters/actions.ts (called on every chapter

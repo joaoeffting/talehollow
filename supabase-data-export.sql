@@ -1,4 +1,4 @@
--- Run this in the Supabase SQL editor for the storyloom project.
+-- Run this in the Supabase SQL editor for the talehollow project.
 --
 -- Lets a signed-in user download a copy of their own data (GDPR Art. 20,
 -- the counterpart to delete_own_account() in supabase-account-deletion.sql

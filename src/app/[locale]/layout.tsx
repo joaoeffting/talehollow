@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   // URLs (e.g. openGraph.images: ["/covers/x.jpg"]) and have them resolve to
   // absolute ones in the actual rendered <meta>/<link> tags.
   metadataBase: new URL(SITE_URL),
-  title: "Storyloom",
+  title: "Talehollow",
   description: "A community platform for serialized fiction.",
 };
 
@@ -52,7 +52,7 @@ export default async function RootLayout({
               <div className="mx-auto flex max-w-5xl items-center justify-between p-4">
                 <div className="flex items-center gap-6">
                   <Link href="/" className="text-lg font-semibold">
-                    Storyloom
+                    Talehollow
                   </Link>
                   {/* Defaults to the current UI locale as the ranking language segment —
         same fallback the homepage feed (Phase 7) uses for a visitor with no
@@ -80,7 +80,7 @@ export default async function RootLayout({
             <main className="mx-auto max-w-5xl p-4 pb-20">{children}</main>
             <footer className="border-t pb-20">
               <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 p-4 text-sm text-muted-foreground">
-                <p>© {new Date().getFullYear()} Storyloom</p>
+                <p>© {new Date().getFullYear()} Talehollow</p>
                 <div className="flex gap-4">
                   <Link href="/terms" className="hover:text-foreground">
                     Terms

@@ -1,4 +1,4 @@
--- Run this in the Supabase SQL editor for the storyloom project.
+-- Run this in the Supabase SQL editor for the talehollow project.
 --
 -- Lets a signed-in user delete their own account and everything tied to it,
 -- in one atomic transaction. Almost none of the tables that reference

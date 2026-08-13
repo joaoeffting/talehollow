@@ -16,7 +16,7 @@ export default function NotFound() {
         href="/"
         className="inline-block text-primary underline underline-offset-4 hover:text-accent"
       >
-        ← Back to Storyloom
+        ← Back to Talehollow
       </Link>
     </div>
   );

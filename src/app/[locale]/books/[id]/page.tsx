@@ -28,7 +28,7 @@ export async function generateMetadata({
   if (!book) return {}; // let the page's own notFound() handle the 404 case
 
   return {
-    title: `${book.title} — Storyloom`,
+    title: `${book.title} — Talehollow`,
     description: book.synopsis ?? undefined,
     alternates: {
       // The slug-rewrite in next.config.ts means this book is also reachable

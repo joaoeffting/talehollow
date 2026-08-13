@@ -12,7 +12,7 @@ import { SaveButton } from "@/components/save-button";
 const PAGE_SIZE = 20;
 
 export const metadata: Metadata = {
-  title: "Search — Storyloom",
+  title: "Search — Talehollow",
 };
 
 // .or()'s filter string is raw PostgREST syntax, not a parameterized query —
