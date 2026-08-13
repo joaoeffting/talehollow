@@ -10,7 +10,10 @@ import * as Sentry from "@sentry/nextjs";
 // dsn is undefined until NEXT_PUBLIC_SENTRY_DSN is actually set — Sentry's
 // SDKs no-op cleanly with no dsn (verified: no crash, nothing sent), so
 // this ships safely ahead of a real Sentry project existing.
+// environment: one Sentry project, not two — see instrumentation-client.ts's
+// comment on the same option for the full reasoning.
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  environment: process.env.NODE_ENV,
   tracesSampleRate: 0,
 });

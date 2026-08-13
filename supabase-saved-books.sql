@@ -11,14 +11,16 @@ create table public.saved_books (
 
 alter table public.saved_books enable row level security;
 
+-- auth.uid() wrapped in (select ...) — otherwise it's re-evaluated per row
+-- instead of once per query (supabase db advisors: auth_rls_initplan).
 create policy "Users can view their own saved books"
   on public.saved_books for select
-  using (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id);
 
 create policy "Users can save books"
   on public.saved_books for insert
-  with check (auth.uid() = user_id);
+  with check ((select auth.uid()) = user_id);
 
 create policy "Users can unsave books"
   on public.saved_books for delete
-  using (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id);
