@@ -184,6 +184,7 @@ export function ChapterList({
 
   return (
     <DndContext
+      id="chapter-list"
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}

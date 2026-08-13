@@ -10,6 +10,8 @@ import { FollowButton } from "@/components/follow-button";
 import { FollowListDialog } from "@/components/follow-list-dialog";
 import { SaveButton } from "@/components/save-button";
 import { ScrapbookSection } from "@/components/scrapbook-section";
+import { ExternalBookCarousel } from "@/components/external-book-carousel";
+import { ExternalBooksManager } from "@/components/external-books-manager";
 import { TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProfileTabs } from "@/components/profile-tabs";
 import { withSlug } from "@/lib/slug";
@@ -120,6 +122,12 @@ export default async function ProfilePage({
         .eq("books.is_published", true)
     : { data: null };
 
+  const { data: externalBooks } = await supabase
+    .from("external_books")
+    .select("id, cover_url, title, synopsis, buy_url")
+    .eq("profile_id", profile.id)
+    .order("position");
+
   const { data: entries } = await supabase
     .from("scrapbook_entries")
     .select(
@@ -217,6 +225,16 @@ export default async function ProfilePage({
           </ul>
         </FollowListDialog>
       </div>
+
+      {isOwner ? (
+        <ExternalBooksManager
+          books={externalBooks ?? []}
+          username={username}
+          locale={locale}
+        />
+      ) : (
+        <ExternalBookCarousel books={externalBooks ?? []} />
+      )}
 
       <ProfileTabs isOwner={isOwner}>
         <TabsList>

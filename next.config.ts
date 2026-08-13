@@ -15,6 +15,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    serverActions: {
+      // Default is 1MB, tight enough that a normal phone-camera JPEG cover
+      // upload (book covers, avatars, external-book covers all go through
+      // a Server Action as multipart/form-data) trips it. 5mb is generous
+      // for a compressed cover image without reopening the payload-size
+      // DoS surface this default exists to bound in the first place.
+      bodySizeLimit: "5mb",
+    },
+  },
   // Strips the "-my-book-title" SEO slug that book/chapter links now carry
   // (see src/lib/slug.ts) before the request ever reaches the [id]/
   // [chapterId] dynamic routes — so page code and revalidatePath calls keep

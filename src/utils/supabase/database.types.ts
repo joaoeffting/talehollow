@@ -200,6 +200,47 @@ export type Database = {
           },
         ]
       }
+      external_books: {
+        Row: {
+          buy_url: string
+          cover_url: string | null
+          created_at: string
+          id: string
+          position: number
+          profile_id: string
+          synopsis: string | null
+          title: string
+        }
+        Insert: {
+          buy_url: string
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          position?: number
+          profile_id: string
+          synopsis?: string | null
+          title: string
+        }
+        Update: {
+          buy_url?: string
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          position?: number
+          profile_id?: string
+          synopsis?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_books_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           content: string

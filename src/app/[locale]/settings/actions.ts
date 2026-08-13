@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { deleteBookCoverFiles } from "../dashboard/books/actions";
 import { deleteAvatarFiles } from "../u/[username]/actions";
+import { deleteExternalBookCoverFiles } from "../u/[username]/external-books-actions";
 
 export async function updateSiteLanguage(
   newLocale: string,
@@ -81,10 +82,17 @@ export async function deleteAccount(locale: string) {
     .from("books")
     .select("id")
     .eq("author_id", userId);
+  const { data: externalBooks } = await supabase
+    .from("external_books")
+    .select("id")
+    .eq("profile_id", userId);
 
   if (profile?.avatar_url) await deleteAvatarFiles(supabase, userId);
   for (const book of books ?? []) {
     await deleteBookCoverFiles(supabase, book.id);
+  }
+  for (const externalBook of externalBooks ?? []) {
+    await deleteExternalBookCoverFiles(supabase, userId, externalBook.id);
   }
 
   // Everything else (books, chapters, comments, likes, views, follows,
