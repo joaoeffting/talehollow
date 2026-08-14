@@ -85,3 +85,88 @@ export async function getChapterId(
   }
   return match[1];
 }
+
+// Adds a second (or later) chapter to a book that already exists — the
+// same per-field steps createDraftBookWithChapter uses for its first
+// chapter, split out so reorder tests can seed more than one.
+export async function addChapterToBook(
+  page: Page,
+  bookId: string,
+  { title, body }: { title: string; body: string },
+) {
+  await page.goto(`/en/dashboard/books/${bookId}`);
+  await openTableOfContentsTab(page);
+  await page.click('button:has-text("+ New chapter")');
+  await page.fill("[name=title]", title);
+  await page.click(".ProseMirror");
+  await page.keyboard.type(body);
+  await page.locator("[name=title]").focus();
+  await page.click('button:has-text("Add chapter")');
+  await expect(page.getByText(title)).toBeVisible();
+}
+
+// The signed-in test account's own username — needed for any test that
+// visits its own public profile (/u/[username]) rather than a book/chapter
+// URL, since nothing in the seeded fixtures carries it directly.
+export async function getOwnUsername(page: Page): Promise<string> {
+  await page.goto("/en/account");
+  const href = await page
+    .getByRole("link", { name: "View public profile" })
+    .getAttribute("href");
+  const match = href?.match(/\/u\/([^/?]+)/);
+  if (!match) {
+    throw new Error(`Could not extract username from profile link href: ${href}`);
+  }
+  return match[1];
+}
+
+// dnd-kit's keyboard sensor (wired alongside the pointer sensor on every
+// sortable list in this app) is far more reliable to drive from Playwright
+// than simulating a real pointer drag: focus the grip handle, Space to pick
+// up, Arrow keys to move, Space to drop. Same interaction a keyboard-only
+// author would use.
+//
+// NOTE: this only works for sortable lists that aren't nested inside a Base
+// UI composite widget (e.g. Accordion) — composite roving-focus intercepts
+// ArrowDown/ArrowUp for its own item-to-item navigation before dnd-kit's
+// KeyboardSensor sees them. external-books-manager.tsx (plain divs) works
+// fine with this; chapter-list.tsx (Accordion-wrapped) does not — see
+// dragViaPointer below for that case.
+export async function reorderViaKeyboard(
+  page: Page,
+  handleName: string | RegExp,
+  direction: "ArrowDown" | "ArrowUp" = "ArrowDown",
+) {
+  await page.getByRole("button", { name: handleName }).focus();
+  await page.keyboard.press("Space");
+  await page.keyboard.press(direction);
+  await page.keyboard.press("Space");
+}
+
+// Real pointer drag for sortable lists where the keyboard sensor path is
+// unavailable or unreliable (see reorderViaKeyboard's note). dnd-kit's
+// PointerSensor needs the first move past its activation `distance` to
+// register the drag start, then further moves to cross the drop target —
+// a single mouse.move straight to the destination doesn't reliably fire
+// dnd-kit's own dragOver/collision detection the way a real drag does.
+export async function dragViaPointer(page: Page, fromHandleName: string | RegExp, toHandleName: string | RegExp) {
+  const from = page.getByRole("button", { name: fromHandleName });
+  const to = page.getByRole("button", { name: toHandleName });
+
+  const fromBox = await from.boundingBox();
+  const toBox = await to.boundingBox();
+  if (!fromBox || !toBox) {
+    throw new Error("Could not get bounding box for drag handle(s)");
+  }
+
+  const fromCenter = { x: fromBox.x + fromBox.width / 2, y: fromBox.y + fromBox.height / 2 };
+  const toCenter = { x: toBox.x + toBox.width / 2, y: toBox.y + toBox.height / 2 };
+
+  await page.mouse.move(fromCenter.x, fromCenter.y);
+  await page.mouse.down();
+  // Past PointerSensor's activationConstraint.distance (4px) before
+  // anything else, so dnd-kit actually registers a drag start.
+  await page.mouse.move(fromCenter.x, fromCenter.y + 10);
+  await page.mouse.move(toCenter.x, toCenter.y, { steps: 10 });
+  await page.mouse.up();
+}

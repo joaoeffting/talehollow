@@ -56,10 +56,17 @@ test("multiple comments from one user count as one commenter", async ({ page }) 
   // Post three separate comments as the same signed-in user — the total
   // comment count should reflect all three, but "people commenting" (the
   // distinct-user count) should not.
+  const postButton = page.getByRole("button", { name: "Post" });
   for (const text of ["first", "second", "third"]) {
     await page.fill("[name=content]", text);
-    await page.getByRole("button", { name: "Post" }).click();
-    await page.waitForLoadState("networkidle");
+    await postButton.click();
+    // Post disables itself (via SaveWithLoading) while its submission is
+    // in flight — waiting for it to re-enable is a more precise signal
+    // than networkidle that the previous comment's full round trip
+    // (mutation + revalidatePath) actually finished before the next one
+    // starts, not just that no network requests happen to be in flight
+    // at the moment networkidle is checked.
+    await expect(postButton).toBeEnabled();
   }
 
   await expect(page.getByText("Comments (3)")).toBeVisible();
