@@ -28,6 +28,14 @@ export function ChapterQuoteShare({
   const shareButtonRef = useRef<HTMLButtonElement>(null);
   const [selected, setSelected] = useState<SelectedQuote | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  // The selection-listener effect below runs once ([] deps) — this ref is
+  // what lets its event handler see the *current* dialogOpen without
+  // re-subscribing listeners on every open/close. Synced via its own
+  // effect rather than mutated during render (refs aren't render state).
+  const dialogOpenRef = useRef(dialogOpen);
+  useEffect(() => {
+    dialogOpenRef.current = dialogOpen;
+  }, [dialogOpen]);
 
   useEffect(() => {
     // Checked once the selection is *finalized* (mouseup/touchend/keyup),
@@ -38,6 +46,19 @@ export function ChapterQuoteShare({
     // missing a double-click's word selection, which settles a tick after
     // the events that would otherwise trigger this.
     function handleSelectionEnd(event: Event) {
+      // Once the dialog is open, the text has already been handed off —
+      // nothing about the underlying page's selection changing should
+      // touch `selected` anymore. This matters a lot on mobile
+      // specifically: opening the dialog there reliably collapses the
+      // real text selection as a side effect (much more aggressively than
+      // desktop), and that collapse still fires a touchend/mouseup
+      // somewhere outside the button (the backdrop, a focus change,
+      // etc.) — without this guard, that stray event nulled `selected`
+      // right after the dialog opened, leaving it stuck showing just the
+      // header with no image.
+      if (dialogOpenRef.current) {
+        return;
+      }
       // Interacting with our own floating button collapses whatever text
       // was selected (a normal side effect of any click) — without this
       // guard that would null out `selected` a moment before the button's
@@ -169,6 +190,48 @@ export function ChapterQuoteShare({
 
 function QuoteImagePreview({ bookId, text }: { bookId: string; text: string }) {
   const imageUrl = `/share-image?bookId=${encodeURIComponent(bookId)}&text=${encodeURIComponent(text)}`;
+  // iOS Safari (and iOS Chrome, which is also WebKit under the hood)
+  // ignores the `download` attribute entirely — clicking the <a> just
+  // navigates to/opens the image instead of saving it. Feature-detecting
+  // the Web Share API and preferring it there isn't just a workaround: it
+  // opens the native share sheet, which already has Instagram/X/Save
+  // Image built in — a better fit for what this button is for than a
+  // manual save-then-upload flow.
+  const [canShareFiles, setCanShareFiles] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [shareError, setShareError] = useState(false);
+
+  useEffect(() => {
+    // Deliberately an effect, not computed during render — `navigator`
+    // doesn't exist during SSR, so this must run post-mount (same
+    // reasoning as chapter-editor.tsx's draft-recovery check).
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- navigator is unavailable during SSR
+    setCanShareFiles(
+      typeof navigator.share === "function" && typeof navigator.canShare === "function",
+    );
+  }, []);
+
+  async function handleShare() {
+    setSharing(true);
+    setShareError(false);
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], "talehollow-quote.png", { type: "image/png" });
+      if (!navigator.canShare({ files: [file] })) {
+        throw new Error("File sharing not supported");
+      }
+      await navigator.share({ files: [file] });
+    } catch (error) {
+      // AbortError just means the user closed the native share sheet
+      // without picking anything — not a failure worth surfacing.
+      if (error instanceof Error && error.name !== "AbortError") {
+        setShareError(true);
+      }
+    } finally {
+      setSharing(false);
+    }
+  }
 
   return (
     <div className="space-y-3">
@@ -177,13 +240,30 @@ function QuoteImagePreview({ bookId, text }: { bookId: string; text: string }) {
         alt="Shareable quote card"
         className="w-full rounded border"
       />
-      <a
-        href={imageUrl}
-        download="talehollow-quote.png"
-        className="block rounded bg-primary px-4 py-2 text-center text-sm text-primary-foreground"
-      >
-        Save image
-      </a>
+      {canShareFiles ? (
+        <button
+          type="button"
+          onClick={handleShare}
+          disabled={sharing}
+          className="w-full rounded bg-primary px-4 py-2 text-center text-sm text-primary-foreground disabled:opacity-70"
+        >
+          {sharing ? "Preparing…" : "Share image"}
+        </button>
+      ) : (
+        <a
+          href={imageUrl}
+          download="talehollow-quote.png"
+          className="block rounded bg-primary px-4 py-2 text-center text-sm text-primary-foreground"
+        >
+          Save image
+        </a>
+      )}
+      {shareError && (
+        <p className="text-sm text-destructive">
+          Couldn&apos;t open the share sheet — press and hold the image above to
+          save it instead.
+        </p>
+      )}
     </div>
   );
 }
