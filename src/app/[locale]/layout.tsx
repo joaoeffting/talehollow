@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Search } from "lucide-react";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
@@ -12,6 +13,16 @@ import { NavAuthLinks } from "@/components/nav-auth-links";
 import { BottomNav } from "@/components/bottom-nav";
 import { SITE_URL } from "@/lib/site";
 import "../globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   // Lets every per-page metadata export below use relative image/canonical
@@ -40,7 +51,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased">
         {/* Makes messages/{locale}.json available to Client Components via
             useTranslations() further down the tree. Server Components use
