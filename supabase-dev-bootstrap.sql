@@ -419,22 +419,29 @@ group by b.id, p.username, p.display_name;
 -- anti-spam RPCs — RECONSTRUCTED, verify with npm run test:e2e
 -- ============================================================
 
-create or replace function public.record_view(p_book_id uuid, p_chapter_id uuid)
+-- Corrected against the function actually deployed on the linked project
+-- (pg_get_functiondef via the Management API) — the version below matches
+-- reality; an earlier draft of this reconstruction was missing the WHERE
+-- guard entirely, which reads as "every visit counts, forever" and led to
+-- a real wrong diagnosis of the homepage-vs-detail-page view count
+-- mismatch (src/app/[locale]/books/[id]/page.tsx) before this was checked
+-- against the live definition.
+create or replace function public.record_view(p_chapter_id uuid, p_book_id uuid)
 returns void
 language plpgsql
 security definer
-set search_path = ''
+set search_path = 'public'
 as $$
-declare
-  v_uid uuid := auth.uid();
 begin
-  if v_uid is null then
-    return;
-  end if;
-  insert into public.views (book_id, chapter_id, user_id, view_count, last_viewed_at)
-  values (p_book_id, p_chapter_id, v_uid, 1, now())
-  on conflict (chapter_id, user_id)
-  do update set view_count = public.views.view_count + 1, last_viewed_at = now();
+  insert into views (chapter_id, book_id, user_id)
+  values (p_chapter_id, p_book_id, auth.uid())
+  on conflict (chapter_id, user_id) do update
+    set view_count = views.view_count + 1, last_viewed_at = now()
+    -- The WHERE is what makes this "re-count after 24h" rather than "every
+    -- visit is a new view": if the last view was more recent than that, the
+    -- DO UPDATE matches zero rows and view_count doesn't move — one atomic
+    -- statement, no separate check-then-write race condition.
+    where views.last_viewed_at < now() - interval '24 hours';
 end;
 $$;
 

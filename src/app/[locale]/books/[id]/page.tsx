@@ -79,27 +79,26 @@ export default async function PublicBookPage({
     .eq("is_published", true)
     .order("position");
 
-  const { data: viewRows } = await supabase
-    .from("views")
-    .select("view_count")
-    .eq("book_id", id);
+  // Sourced from book_rankings (same view every other "views" number in the
+  // app already reads from — homepage, rankings, search, profile pages),
+  // not a separate raw sum of views.view_count + chapters.anon_view_count.
+  // That older computation counted every repeat visit as its own view (one
+  // reader coming back on 4 different days looked like "4 views" here but
+  // "1" everywhere else, since unique_views is a distinct-viewer count) —
+  // same book, two genuinely different numbers depending on which page
+  // you were on.
+  const { data: ranking } = await supabase
+    .from("book_rankings")
+    .select("unique_views")
+    .eq("id", id)
+    .maybeSingle();
 
-  const viewCount = viewRows?.reduce((sum, v) => sum + v.view_count, 0) ?? 0;
-
-  const { data: chapterViews } = await supabase
-    .from("chapters")
-    .select("anon_view_count")
-    .eq("book_id", id)
-    .eq("is_published", true);
+  const totalViews = ranking?.unique_views ?? 0;
 
   const { count: likeCount } = await supabase
     .from("likes")
     .select("*", { count: "exact", head: true })
     .eq("book_id", id);
-
-  const totalAnonViews =
-    chapterViews?.reduce((sum, c) => sum + c.anon_view_count, 0) ?? 0;
-  const totalViews = viewCount + totalAnonViews;
 
   const { count: commentCount } = await supabase
     .from("comments")
