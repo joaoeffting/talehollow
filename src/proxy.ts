@@ -89,11 +89,12 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // sitemap.xml/robots.txt (src/app/sitemap.ts, robots.ts) and auth/confirm
-    // (src/app/auth/confirm/route.ts) all live at the app root, outside
-    // [locale] — without excluding them here, next-intl's locale redirect
-    // would send them to e.g. /en/auth/confirm, which 404s (no [locale]
-    // route exists there) instead of reaching the actual root-level handler.
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|auth/confirm|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // sitemap.xml/robots.txt (src/app/sitemap.ts, robots.ts), auth/confirm
+    // (src/app/auth/confirm/route.ts), and share-image (src/app/share-image/
+    // route.ts) all live at the app root, outside [locale] — without
+    // excluding them here, next-intl's locale redirect would send them to
+    // e.g. /en/share-image, which 404s (no [locale] route exists there)
+    // instead of reaching the actual root-level handler.
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|auth/confirm|share-image|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -8,6 +8,7 @@ import { LastReadTracker } from "./last-read-tracker";
 import { LikeButton } from "./like-button";
 import { CommentSection } from "./comment-section";
 import { ReportButton } from "@/components/report-button";
+import { ChapterQuoteShare } from "@/components/chapter-quote-share";
 import { withSlug } from "@/lib/slug";
 import { SITE_URL } from "@/lib/site";
 import { sanitizeChapterHtml } from "@/lib/sanitize-chapter-html";
@@ -183,11 +184,10 @@ export default async function ChapterPage({
         ← Go back to book
       </Link>
       <h1 className="text-2xl font-semibold mt-5">{chapter.title}</h1>
-      <div
+      <ChapterQuoteShare
+        html={sanitizeChapterHtml(chapter.content ?? "")}
+        bookId={id}
         className="prose max-w-none"
-        dangerouslySetInnerHTML={{
-          __html: sanitizeChapterHtml(chapter.content ?? ""),
-        }}
       />
       <div className="flex items-center gap-4">
         <LikeButton
