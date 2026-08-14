@@ -182,6 +182,7 @@ function SortableBookRow({
         >
           <ConfirmSubmitButton
             confirmMessage={`Remove "${book.title}"? This can't be undone.`}
+            ariaLabel={`Remove "${book.title}"`}
             className="text-destructive"
           >
             <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

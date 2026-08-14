@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { ExportDataButton } from "@/components/export-data-button";
+import { SaveWithLoading } from "@/components/save-with-loading";
 import {
   updateSiteLanguage,
   updateContentLanguage,
@@ -48,9 +49,7 @@ export default async function SettingsPage({
             Português (coming soon)
           </option>
         </select>
-        <button className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground">
-          Save
-        </button>
+        <SaveWithLoading label="Save" />
       </form>
 
       <form
@@ -70,9 +69,7 @@ export default async function SettingsPage({
           <option value="en">English</option>
           <option value="pt">Português</option>
         </select>
-        <button className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground">
-          Save
-        </button>
+        <SaveWithLoading label="Save" />
       </form>
 
       <div className="space-y-2 rounded border p-4">
@@ -97,6 +94,7 @@ export default async function SettingsPage({
         <form action={deleteAccount.bind(null, locale)}>
           <ConfirmSubmitButton
             confirmMessage="Delete your account and everything you've posted? This can't be undone."
+            pendingLabel="Deleting…"
             className="rounded border border-destructive px-3 py-1 text-sm text-destructive"
           >
             Delete account

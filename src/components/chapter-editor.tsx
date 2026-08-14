@@ -19,10 +19,17 @@ export function ChapterEditor({
   draftKey,
   titleDefaultValue = "",
   contentDefaultValue = "",
+  onSubmitted,
 }: {
   draftKey: string;
   titleDefaultValue?: string;
   contentDefaultValue?: string;
+  // Fires once, on the same pending: true -> false edge that clears the
+  // local draft below — i.e. right when this editor's form finishes
+  // submitting. The new-chapter form uses this to close and reset itself;
+  // the per-chapter edit form (which wants to keep showing what was just
+  // saved) leaves it unset.
+  onSubmitted?: () => void;
 }) {
   const [title, setTitle] = useState(titleDefaultValue);
   const [content, setContent] = useState(contentDefaultValue);
@@ -64,9 +71,10 @@ export function ChapterEditor({
   useEffect(() => {
     if (wasPending.current && !pending) {
       clearChapterDraft(draftKey);
+      onSubmitted?.();
     }
     wasPending.current = pending;
-  }, [pending, draftKey]);
+  }, [pending, draftKey, onSubmitted]);
 
   function scheduleAutosave(nextTitle: string, nextContent: string) {
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);

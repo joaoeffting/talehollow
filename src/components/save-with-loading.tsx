@@ -5,8 +5,23 @@ import { useFormStatus } from "react-dom";
 
 export function SaveWithLoading({
   label = "Save chapter",
+  // Defaults to "<label>…" — override for buttons where that reads oddly
+  // (e.g. label="Log in" -> pendingLabel="Logging in…").
+  pendingLabel,
+  // Pass null to skip the brief "just finished" flash entirely — right
+  // for toggle-style buttons whose own label already reflects the new
+  // state once the server action's revalidatePath lands (e.g.
+  // Publish/Unpublish switching itself), where a transient "Saved" would
+  // just be confusing.
+  savedLabel = "Saved",
+  className = "rounded bg-primary px-3 py-1 text-sm text-primary-foreground disabled:opacity-70",
+  icon,
 }: {
   label?: string;
+  pendingLabel?: string;
+  savedLabel?: string | null;
+  className?: string;
+  icon?: React.ReactNode;
 }) {
   // useFormStatus only sees the nearest ancestor <form> — that's why this
   // has to be its own component rendered *inside* the form, rather than a
@@ -27,12 +42,16 @@ export function SaveWithLoading({
     wasPending.current = pending;
   }, [pending]);
 
+  const text = pending
+    ? (pendingLabel ?? `${label}…`)
+    : justSaved && savedLabel
+      ? savedLabel
+      : label;
+
   return (
-    <button
-      disabled={pending}
-      className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground disabled:opacity-70"
-    >
-      {pending ? "Saving…" : justSaved ? "Saved" : label}
+    <button disabled={pending} className={className}>
+      {icon}
+      {text}
     </button>
   );
 }

@@ -52,20 +52,23 @@ export default async function EditBookPage({
             book.is_published,
           )}
         >
-          <button
+          <SaveWithLoading
+            label={book.is_published ? "Unpublish" : "Publish"}
+            pendingLabel={book.is_published ? "Unpublishing…" : "Publishing…"}
+            savedLabel={null}
             className={
               book.is_published
-                ? "rounded border border-amber-600 px-3 py-1 text-sm text-amber-700"
-                : "rounded border border-primary px-3 py-1 text-sm text-primary"
+                ? "rounded border border-amber-600 px-3 py-1 text-sm text-amber-700 disabled:opacity-60"
+                : "rounded border border-primary px-3 py-1 text-sm text-primary disabled:opacity-60"
             }
-          >
-            {book.is_published ? "Unpublish" : "Publish"}
-          </button>
+          />
         </form>
         <form action={publishBookAndChapters.bind(null, book.id, locale)}>
-          <button className="rounded bg-primary px-3 py-1 text-sm text-primary-foreground">
-            Publish book + all chapters
-          </button>
+          <SaveWithLoading
+            label="Publish book + all chapters"
+            pendingLabel="Publishing…"
+            savedLabel={null}
+          />
         </form>
         {book.is_published && (
           <Link
@@ -135,6 +138,7 @@ export default async function EditBookPage({
             <form action={removeCoverWithId}>
               <ConfirmSubmitButton
                 confirmMessage={`Remove the cover for "${book.title}"? This can't be undone.`}
+                pendingLabel="Removing…"
                 className="text-sm text-destructive underline"
               >
                 Remove Cover
@@ -144,6 +148,7 @@ export default async function EditBookPage({
           <form action={deleteWithId}>
             <ConfirmSubmitButton
               confirmMessage={`Delete "${book.title}"? This deletes every chapter in it too — this can't be undone.`}
+              pendingLabel="Deleting…"
               className="rounded border border-destructive px-4 py-2 text-destructive"
             >
               Delete book

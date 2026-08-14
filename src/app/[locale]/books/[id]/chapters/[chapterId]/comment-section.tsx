@@ -6,6 +6,7 @@ import { MessageCircle, Send, Trash2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { SaveWithLoading } from "@/components/save-with-loading";
 import { postComment, deleteComment } from "../../../actions";
 
 type Comment = {
@@ -84,10 +85,13 @@ export function CommentSection({
             placeholder="Add a comment"
             className="w-full rounded border p-2"
           />
-          <button className="flex items-center gap-1.5 rounded bg-primary px-3 py-1 text-sm text-primary-foreground">
-            <Send className="h-4 w-4" aria-hidden="true" />
-            Post
-          </button>
+          <SaveWithLoading
+            label="Post"
+            pendingLabel="Posting…"
+            savedLabel={null}
+            icon={<Send className="h-4 w-4" aria-hidden="true" />}
+            className="flex items-center gap-1.5 rounded bg-primary px-3 py-1 text-sm text-primary-foreground disabled:opacity-70"
+          />
         </form>
       )}
 
@@ -147,6 +151,7 @@ export function CommentSection({
                   >
                     <ConfirmSubmitButton
                       confirmMessage="Delete this comment? This can't be undone."
+                      pendingLabel="Deleting…"
                       className="mt-1 flex items-center gap-1 text-xs text-destructive"
                     >
                       <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />

@@ -1,6 +1,7 @@
 import { CoverInput } from "@/components/cover-input";
 import { createBook } from "../actions";
 import { GenreSelect } from "@/components/genre-select";
+import { SaveWithLoading } from "@/components/save-with-loading";
 
 export default async function NewBookPage({
   params,
@@ -48,9 +49,11 @@ export default async function NewBookPage({
         />
       </div>
       <CoverInput />
-      <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
-        Create draft
-      </button>
+      <SaveWithLoading
+        label="Create draft"
+        pendingLabel="Creating…"
+        className="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-70"
+      />
     </form>
   );
 }

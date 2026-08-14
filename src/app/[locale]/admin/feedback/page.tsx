@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { SaveWithLoading } from "@/components/save-with-loading";
 import { toggleFeedbackReviewed } from "./actions";
 
 export default async function AdminFeedbackPage({
@@ -66,9 +67,12 @@ export default async function AdminFeedbackPage({
               </div>
               <p className="whitespace-pre-wrap">{entry.content}</p>
               <form action={toggleWithIds}>
-                <button className="text-xs text-primary underline underline-offset-4">
-                  {isReviewed ? "Mark as new" : "Mark reviewed"}
-                </button>
+                <SaveWithLoading
+                  label={isReviewed ? "Mark as new" : "Mark reviewed"}
+                  pendingLabel="…"
+                  savedLabel={null}
+                  className="text-xs text-primary underline underline-offset-4 disabled:opacity-60"
+                />
               </form>
             </li>
           );

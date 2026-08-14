@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { SaveWithLoading } from "@/components/save-with-loading";
 import { updatePassword } from "./actions";
 
 export default async function ResetPasswordPage({
@@ -42,9 +43,11 @@ export default async function ResetPasswordPage({
           placeholder="Confirm new password"
           className="w-full rounded border p-2"
         />
-        <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
-          Save new password
-        </button>
+        <SaveWithLoading
+          label="Save new password"
+          pendingLabel="Saving…"
+          className="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-70"
+        />
       </form>
     </div>
   );

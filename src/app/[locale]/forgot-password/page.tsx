@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { Link } from "@/i18n/navigation";
 import { TurnstileWidget } from "@/components/turnstile-widget";
+import { SaveWithLoading } from "@/components/save-with-loading";
 import { requestPasswordReset } from "../login/actions";
 
 export default async function ForgotPasswordPage({
@@ -35,9 +36,11 @@ export default async function ForgotPasswordPage({
             className="w-full rounded border p-2"
           />
           <TurnstileWidget nonce={nonce} />
-          <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
-            Send reset link
-          </button>
+          <SaveWithLoading
+            label="Send reset link"
+            pendingLabel="Sending…"
+            className="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-70"
+          />
         </form>
       )}
 

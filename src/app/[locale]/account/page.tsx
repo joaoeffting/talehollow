@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { SaveWithLoading } from "@/components/save-with-loading";
 import { logout } from "../login/actions";
 
 export default async function AccountPage({
@@ -40,7 +41,12 @@ export default async function AccountPage({
         View public profile
       </Link>
       <form action={logout.bind(null, locale)}>
-        <button className="rounded border px-4 py-2">Log out</button>
+        <SaveWithLoading
+          label="Log out"
+          pendingLabel="Logging out…"
+          savedLabel={null}
+          className="rounded border px-4 py-2 disabled:opacity-60"
+        />
       </form>
     </div>
   );

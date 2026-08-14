@@ -34,7 +34,10 @@ export function NewChapterForm({
   return (
     <form action={action} className="space-y-2 rounded border p-4">
       <h3 className="font-medium">Add chapter</h3>
-      <ChapterEditor draftKey={`new:${bookId}`} />
+      <ChapterEditor
+        draftKey={`new:${bookId}`}
+        onSubmitted={() => setOpen(false)}
+      />
       <div className="flex gap-2">
         <SaveWithLoading label="Add chapter" />
         <button

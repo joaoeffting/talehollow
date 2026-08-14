@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { Link } from "@/i18n/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TurnstileWidget } from "@/components/turnstile-widget";
+import { SaveWithLoading } from "@/components/save-with-loading";
 import { login, signup } from "./actions";
 
 const TAB_VALUES = ["login", "signup"] as const;
@@ -54,9 +55,11 @@ export default async function LoginPage({
             />
             <TurnstileWidget nonce={nonce} />
             <div className="flex items-center justify-between">
-              <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
-                Log in
-              </button>
+              <SaveWithLoading
+                label="Log in"
+                pendingLabel="Logging in…"
+                className="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-70"
+              />
               <Link
                 href="/forgot-password"
                 className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
@@ -93,9 +96,11 @@ export default async function LoginPage({
               className="w-full rounded border p-2"
             />
             <TurnstileWidget nonce={nonce} />
-            <button className="rounded bg-primary px-4 py-2 text-primary-foreground">
-              Sign up
-            </button>
+            <SaveWithLoading
+              label="Sign up"
+              pendingLabel="Signing up…"
+              className="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-70"
+            />
           </form>
         </TabsContent>
       </Tabs>

@@ -67,7 +67,7 @@ export function ScrapbookSection({
             placeholder="Leave a public note"
             className="w-full rounded border p-2"
           />
-          <SaveWithLoading label="Post" />
+          <SaveWithLoading label="Post" pendingLabel="Posting…" savedLabel={null} />
         </form>
       )}
 
@@ -106,6 +106,7 @@ export function ScrapbookSection({
                   >
                     <ConfirmSubmitButton
                       confirmMessage="Delete this note? This can't be undone."
+                      pendingLabel="Deleting…"
                       className="flex items-center gap-1 text-xs text-destructive"
                     >
                       <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
