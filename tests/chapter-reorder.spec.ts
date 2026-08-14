@@ -55,6 +55,14 @@ test("dragging a chapter's grip handle reorders the table of contents", async ({
   // needed to see it) — reorderChapters fires in the background.
   await expect.poll(titles).toEqual([chapterBTitle, chapterATitle]);
 
+  // handleDragEnd calls reorderChapters fire-and-forget (`void`, not
+  // awaited) — reloading immediately can race ahead of that background
+  // mutation actually landing, making this assertion flake on whether the
+  // save happened to finish in time rather than on whether it saved
+  // correctly at all. Waiting for the network to go quiet gives it a
+  // chance to actually complete first.
+  await page.waitForLoadState("networkidle");
+
   // Reload to confirm the reorder actually persisted server-side, not
   // just in the optimistic client state.
   await page.reload();

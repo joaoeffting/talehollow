@@ -49,11 +49,26 @@ test("adding, drag-reordering, and removing external books", async ({
   await dragViaPointer(page, `Reorder "${bookA}"`, `Reorder "${bookB}"`);
   await expect.poll(() => externalBookOrder(page)).toEqual([bookB, bookA]);
 
+  // dnd-kit's drop animation (the row easing into its final position) is a
+  // CSS transition, not a network request — waitForLoadState("networkidle")
+  // doesn't wait for it. Clicking a delete button while a row is still
+  // physically settling can hit Playwright's own actionability retry (the
+  // element moves between its stability checks), which can dispatch the
+  // click twice and fire window.confirm() twice for one page.once()
+  // handler — surfacing as "Cannot accept dialog which is already
+  // handled!" rather than anything actually wrong with the delete itself.
+  await page.waitForTimeout(400);
+
   // Clean up both — this test creates its own data, so it's the only
-  // thing responsible for removing it again.
+  // thing responsible for removing it again. Waiting for the whole page's
+  // revalidatePath-driven re-render to settle before the next iteration
+  // avoids the same kind of mid-transition click landing on a DOM node
+  // that's about to be replaced by the previous deletion's own re-render.
   for (const title of [bookA, bookB]) {
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: `Remove "${title}"` }).click();
     await expect(page.getByText(title)).not.toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(400);
   }
 });
