@@ -101,6 +101,18 @@
   html {
     @apply font-sans;
   }
+  /* iOS Safari auto-zooms the whole page in on focus for any text input
+     under 16px — several forms (login/signup among them) sit inside a
+     TabsContent, which sets text-sm (14px) on an ancestor that these
+     inherit their font-size from. Forcing 16px here is the standard fix:
+     it's not a visual downgrade (Tailwind's own base text size is 16px),
+     and it guarantees no input anywhere can trip this again regardless of
+     whatever text-size class wraps it. */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }
 
 /* Tiptap's EditorContent forwards className to a wrapper div, not to the
