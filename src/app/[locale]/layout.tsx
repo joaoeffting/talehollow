@@ -93,6 +93,9 @@ export default async function RootLayout({
               <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 p-4 text-sm text-muted-foreground">
                 <p>© {new Date().getFullYear()} Talehollow</p>
                 <div className="flex gap-4">
+                  <Link href="/about" className="hover:text-foreground">
+                    About
+                  </Link>
                   <Link href="/terms" className="hover:text-foreground">
                     Terms
                   </Link>
