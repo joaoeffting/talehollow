@@ -5,6 +5,7 @@ import { createChapter } from "./chapters/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { CoverInput } from "@/components/cover-input";
 import { NewChapterForm } from "@/components/new-chapter-form";
+import { ImportChaptersDialog } from "@/components/import-chapters-dialog";
 import { ChapterList } from "@/components/chapter-list";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { SaveWithLoading } from "@/components/save-with-loading";
@@ -157,10 +158,13 @@ export default async function EditBookPage({
         </TabsContent>
 
         <TabsContent value="toc" className="space-y-4">
-          <NewChapterForm
-            bookId={book.id}
-            action={createChapter.bind(null, book.id, locale)}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <NewChapterForm
+              bookId={book.id}
+              action={createChapter.bind(null, book.id, locale)}
+            />
+            <ImportChaptersDialog bookId={book.id} locale={locale} />
+          </div>
 
           {chapters && chapters.length > 0 && (
             <ChapterList

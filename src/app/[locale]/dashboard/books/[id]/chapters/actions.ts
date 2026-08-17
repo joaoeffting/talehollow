@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import * as Sentry from "@sentry/nextjs";
+import mammoth from "mammoth";
 import { createClient } from "@/utils/supabase/server";
 import { sanitizeChapterHtml } from "@/lib/sanitize-chapter-html";
+import { splitIntoChapters } from "@/lib/parse-docx-chapters";
 
 export async function toggleChapterPublished(
   chapterId: string,
@@ -127,4 +129,100 @@ export async function reorderChapters(
   );
 
   revalidatePath(`/${locale}/dashboard/books/${bookId}`);
+}
+
+export type ParsedChapter = { title: string; contentHtml: string; excerpt: string };
+
+// Called directly (not as a <form action>) — the caller needs the parsed
+// preview back to render and let the author confirm/edit before anything
+// touches the database, not a redirect/revalidate.
+export async function parseDocxForImport(
+  formData: FormData,
+): Promise<
+  | { ok: true; chapters: ParsedChapter[]; hadFrontMatter: boolean }
+  | { ok: false; error: string }
+> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "No file uploaded." };
+  }
+  if (!file.name.toLowerCase().endsWith(".docx")) {
+    return {
+      ok: false,
+      error: 'Please upload a .docx file (Word\'s older .doc format isn\'t supported).',
+    };
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  let html: string;
+  try {
+    html = (await mammoth.convertToHtml({ buffer })).value;
+  } catch {
+    return { ok: false, error: "Couldn't read that file — is it a valid .docx?" };
+  }
+
+  const { chapters: rawChapters, frontMatterHtml } = splitIntoChapters(html);
+
+  if (rawChapters.length === 0) {
+    return {
+      ok: false,
+      error:
+        'No chapter headings found. Make sure each chapter title uses Word\'s "Heading 1" style, not just bold/large text.',
+    };
+  }
+
+  // Sanitized now, at parse time — the preview the author reviews and the
+  // content that eventually gets saved (importChapters below) need to
+  // match exactly, or "looks right in preview" stops meaning anything.
+  const chapters: ParsedChapter[] = rawChapters.map((c) => {
+    const sanitized = sanitizeChapterHtml(c.contentHtml);
+    return {
+      title: c.title,
+      contentHtml: sanitized,
+      excerpt: sanitized
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 160),
+    };
+  });
+
+  const hadFrontMatter =
+    frontMatterHtml.replace(/<[^>]+>/g, "").trim().length > 0;
+
+  return { ok: true, chapters, hadFrontMatter };
+}
+
+export async function importChapters(
+  bookId: string,
+  locale: string,
+  chapters: { title: string; contentHtml: string }[],
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createClient();
+
+  const { count } = await supabase
+    .from("chapters")
+    .select("*", { count: "exact", head: true })
+    .eq("book_id", bookId);
+
+  const startPosition = (count ?? 0) + 1;
+
+  const { error } = await supabase.from("chapters").insert(
+    chapters.map((chapter, index) => ({
+      book_id: bookId,
+      position: startPosition + index,
+      title: chapter.title,
+      // Re-sanitized here too, not just trusted from the preview step —
+      // this is the actual write path, and nothing guarantees the client
+      // handed back exactly what parseDocxForImport produced.
+      content: sanitizeChapterHtml(chapter.contentHtml),
+    })),
+  );
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath(`/${locale}/dashboard/books/${bookId}`);
+  return { ok: true };
 }
