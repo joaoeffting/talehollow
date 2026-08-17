@@ -63,24 +63,33 @@ export default async function AdminReportsPage({
   const { data } = await supabase.auth.getClaims();
   if (!data?.claims) redirect(`/${locale}/login`);
 
+  // An explicit is_admin check, not "did the query come back null" — a
+  // select blocked entirely by RLS still resolves as an empty array with
+  // no error, not null, so that signal never actually distinguished "you're
+  // not an admin" from "there's genuinely nothing here yet." Same latent
+  // gap already found and fixed on the admin feedback page: a non-admin
+  // visiting this page saw "no reports" instead of being redirected — no
+  // data leaked (RLS still hid every row's content), but the page wasn't
+  // behaving as an actual gate.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin")
+    .eq("id", data.claims.sub)
+    .single();
+  if (!profile?.is_admin) redirect(`/${locale}`);
+
   const { data: reports } = await supabase
     .from("reports")
     .select("*")
     .order("created_at", { ascending: false });
 
-  // If you're signed in but not an admin, RLS's select policy returns
-  // nothing at all (not an error) — `reports` comes back as `null` rather
-  // than an empty array, which is how this page tells "blocked by RLS"
-  // apart from "genuinely zero reports" (handled separately below).
-  if (reports === null) redirect(`/${locale}`);
-
-  const targetLinks = await resolveTargetLinks(supabase, reports);
+  const targetLinks = await resolveTargetLinks(supabase, reports ?? []);
 
   return (
     <div className="space-y-4 py-12">
       <h1 className="text-2xl font-semibold">Reports</h1>
       <ul className="divide-y rounded border">
-        {reports.map((report) => {
+        {(reports ?? []).map((report) => {
           const href = targetLinks.get(report.target_id);
           return (
             <li key={report.id} className="p-4 text-sm">
@@ -110,7 +119,7 @@ export default async function AdminReportsPage({
             </li>
           );
         })}
-        {reports.length === 0 && (
+        {(reports ?? []).length === 0 && (
           <li className="p-4 text-sm text-muted-foreground">No reports.</li>
         )}
       </ul>
