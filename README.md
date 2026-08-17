@@ -5,7 +5,7 @@ chapters, readers discover, follow, and engage with them through views, likes,
 comments, and public profile activity. Built as a Wattpad-style platform, with a
 calmer, ad-light reading experience as the explicit positioning against it.
 
-**Live at:** _(deploying to [talehollow.app](https://talehollow.app))_
+**Live at:** [talehollow.app](https://talehollow.app)
 
 ## What's actually built
 
@@ -26,8 +26,13 @@ calmer, ad-light reading experience as the explicit positioning against it.
   a Playwright integration test suite (`npm run test:e2e`), not just
   RLS/schema-level trust.
 - **Social** — follows, throttled notifications, public profiles with inline
-  editing, a public "scrapbook" wall, save-for-later, and browser-local
-  "continue reading" progress.
+  editing, a public "scrapbook" wall, save-for-later, an author book
+  showcase for work published elsewhere, and browser-local "continue
+  reading" progress.
+- **Share as image** — select any passage of a chapter and generate a
+  branded, downloadable quote card (book cover background, the excerpt,
+  attribution, a site-URL footer) sized for Instagram/X, server-rendered
+  on demand via `next/og`'s `ImageResponse`.
 - **Moderation** — a report affordance on books/chapters/scrapbook entries,
   with an admin review page.
 - **SEO** — per-page metadata, Open Graph, canonical URLs, sitemap/robots,
@@ -65,6 +70,18 @@ A few things worth a closer look in the code, not just the feature list:
   ranking formula, the feed-push throttle, and notification dispatch all key
   off distinct users/24h windows rather than raw event counts, specifically
   so they resist trivial gaming.
+- **A React internals bug only real-device testing surfaced** — the share-
+  as-image selection UI initially relied on the browser's native text
+  highlight staying visible after picking a quote. On mobile it didn't:
+  React's own selection-preservation logic (it saves/restores focus-
+  adjacent selection state around every commit) clears `window.getSelection()`
+  as a side effect of the very state update needed to show the "Share"
+  button — invisible on desktop, where a stray click doesn't have the same
+  effect, but reliably reproducible on a phone. Root-caused with a
+  controlled test (isolating the re-render from the DOM change it triggers)
+  rather than guessed at; fixed by snapshotting the selection's geometry
+  and rendering an independent highlight instead of depending on the
+  browser to keep its own around.
 
 ## Built with Claude Code
 
@@ -92,7 +109,7 @@ those values are committed to the repo.
 
 ```bash
 npm run lint       # ESLint
-npm run test:e2e   # Playwright anti-spam integration tests
+npm run test:e2e   # Playwright integration tests (anti-spam, reordering, saved books, feedback, nav)
 npm run gen:types  # Regenerate src/utils/supabase/database.types.ts from the live schema
 ```
 
